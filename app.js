@@ -9,7 +9,7 @@ const app = express();
 const ports = process.env.PORTS || 4000;
 
 app.use(express.json())
-app.use("/api/auth" , authRouter)
+app.use("/api/user" , authRouter)
 app.use(errorMiddleware)
  
 const startServer = async () => {

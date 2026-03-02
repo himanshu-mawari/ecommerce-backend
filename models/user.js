@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+import "dotenv/config"
 
 const userSchema = mongoose.Schema(
   {
@@ -15,6 +17,7 @@ const userSchema = mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
+      unique: true
     },
     password: {
       type: String,
@@ -43,9 +46,15 @@ userSchema.methods.verifyPassword = async function (password) {
   const user = this;
   const oldPassword = user.password;
 
-  const isCorrectPassword = await bcrypt.compare(password, oldPassword);
-  return isCorrectPassword;
+  const isPasswordMatch = await bcrypt.compare(password, oldPassword);
+  return isPasswordMatch;
 };
+
+userSchema.methods.getJwt =  function (){
+  const user = this;
+  const token =  jwt.sign({_id : user._id} , process.env.SECRET_KEY , {expiresIn : "7d"});
+  return token
+}
 
 const User = mongoose.model("User", userSchema);
 export default User;
