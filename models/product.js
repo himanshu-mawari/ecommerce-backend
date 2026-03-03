@@ -1,0 +1,44 @@
+import mongoose from "mongoose";
+
+const productSchema = mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minLength: [3, "Product name must be at least contain 3 characters"],
+    maxLength: [30, "Product name must be at most contain 30 characters"],
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: {
+      values: ["Men", "Women", "Kids"],
+      message: `{VALUE} is not a valid category`,
+    },
+  },
+  subCategory: {
+    type: String,
+    required: true,
+  },
+
+  price: {
+    type: Number,
+    required: true,
+    min: [0, "Price cannot be negative"],
+  },
+  image: {
+    type: String,
+    required: true,
+  },
+  stockQuantity: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+},{timestamps: true});
+
+const Product = mongoose.model("Product", productSchema);
+export default Product;
