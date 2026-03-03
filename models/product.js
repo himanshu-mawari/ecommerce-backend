@@ -29,10 +29,15 @@ const productSchema = mongoose.Schema({
     required: true,
     min: [0, "Price cannot be negative"],
   },
-  image: {
-    type: String,
-    required: true,
-  },
+  images: [{
+    url:{type: String,
+      required: true,},
+      public_id : {type: String,
+      required: true,}
+  }
+
+    
+],
   stockQuantity: {
     type: Number,
     required: true,
