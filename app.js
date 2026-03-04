@@ -11,7 +11,7 @@ const ports = process.env.PORTS || 4000;
 
 app.use(express.json());
 app.use("/api/user", authRouter);
-app.use("/api/product", productRouter);
+app.use("/api/products", productRouter);
 app.use(errorMiddleware);
 
 const startServer = async () => {
