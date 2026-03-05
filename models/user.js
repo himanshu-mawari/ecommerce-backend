@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
-import "dotenv/config"
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 const userSchema = mongoose.Schema(
   {
@@ -17,7 +17,7 @@ const userSchema = mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
@@ -38,6 +38,14 @@ const userSchema = mongoose.Schema(
         },
       },
     ],
+    role: {
+      type: String,
+      enum: {
+        values: ["admin", "user"],
+        message: `{VALUE} is not a valid role`,
+      },
+      default : "user"
+    },
   },
   { minimize: false },
 );
@@ -50,11 +58,13 @@ userSchema.methods.verifyPassword = async function (password) {
   return isPasswordMatch;
 };
 
-userSchema.methods.getJwt =  function (){
+userSchema.methods.getJwt = function () {
   const user = this;
-  const token =  jwt.sign({_id : user._id} , process.env.SECRET_KEY , {expiresIn : "7d"});
-  return token
-}
+  const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
+    expiresIn: "7d",
+  });
+  return token;
+};
 
 const User = mongoose.model("User", userSchema);
 export default User;

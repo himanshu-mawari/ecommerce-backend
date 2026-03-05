@@ -5,11 +5,13 @@ import connectCloudinary from "./config/cloudinary.js";
 import authRouter from "./routes/auth.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import productRouter from "./routes/productRoute.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const ports = process.env.PORTS || 4000;
 
 app.use(express.json());
+app.use(cookieParser())
 app.use("/api/user", authRouter);
 app.use("/api/products", productRouter);
 app.use(errorMiddleware);

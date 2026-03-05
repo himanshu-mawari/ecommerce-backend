@@ -1,11 +1,13 @@
 import { addProduct , removeProduct , singleProduct , listProduct } from "../controllers/productController.js";
 import express from "express";
 import upload from "../middlewares/multerMiddleware.js"; 
+import verifyAuth from "../middlewares/verifyAuth.js";
+import verifyAdmin from "../middlewares/verifyAdmin.js";
 
 const productRouter = express.Router();
 
 productRouter.post(
-  "/add",
+  "/add", verifyAuth , verifyAdmin  ,
   upload.fields([
     { name: "image1", maxCount: 1 },
     { name: "image2", maxCount: 1 },
