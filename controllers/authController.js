@@ -38,7 +38,7 @@ export const signupUser = async (req, res, next) => {
 
     const isUserExist = await User.findOne({ email });
     if (isUserExist) {
-      return next(createError(400, "EmailId already registered"));
+      return next(createError(400, "Email already registered"));
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -53,7 +53,7 @@ export const signupUser = async (req, res, next) => {
     const token = savedUser.getJwt();
     res.cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
 
-    const { password: _, ...safeUserDetails } = user.toObject();
+    const { password: _, ...safeUserDetails } = savedUser.toObject();
 
     res.json({
       message: "Successfully signup user",

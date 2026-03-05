@@ -18,7 +18,7 @@ const verifyAuth = async (req, res, next) => {
       return next(createError(401, "User not found"));
     }
     req.user = user;
-
+    
     next();
   } catch (err) {
     next(err);

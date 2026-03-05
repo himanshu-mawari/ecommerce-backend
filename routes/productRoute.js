@@ -7,7 +7,9 @@ import verifyAdmin from "../middlewares/verifyAdmin.js";
 const productRouter = express.Router();
 
 productRouter.post(
-  "/add", verifyAuth , verifyAdmin  ,
+  "/add", 
+  verifyAuth,
+  verifyAdmin,
   upload.fields([
     { name: "image1", maxCount: 1 },
     { name: "image2", maxCount: 1 },
@@ -19,5 +21,6 @@ productRouter.post(
 productRouter.delete("/remove", removeProduct);
 productRouter.get("/:id", singleProduct);
 productRouter.get("/list", listProduct);
+
 
 export default productRouter; 
