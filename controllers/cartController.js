@@ -68,7 +68,6 @@ export const updateCart = async (req, res, next) => {
     const existCart = loggedInUser.cartData.find(
       (item) => item.product.toString() === productId,
     );
-    console.log(existCart)
     if (!existCart) {
       return next(createError(404, "Product not found"));
     }
@@ -96,6 +95,30 @@ export const updateCart = async (req, res, next) => {
     res.json({
       message: "Successfully updated cart",
       data: loggedInUser.cartData,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeCart = async (req, res, next) => {
+  try {
+
+    const loggedInUser = req.user;
+    const {productId} = req.params;
+
+    const cartItem = loggedInUser.cartData.find(item => item.product.toString() === productId);
+    if(!cartItem){
+      return next(createError(404 , "Product not found"))
+    }
+
+    loggedInUser.cartData =  loggedInUser.cartData.filter(item => item.product.toString() !== productId)    
+    
+    await loggedInUser.save();
+
+    res.json({
+      message: "Item removed from cart",
+      data : loggedInUser.cartData
     });
   } catch (err) {
     next(err);
