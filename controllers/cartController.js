@@ -7,20 +7,27 @@ export const addCartItem = async (req, res, next) => {
   try {
     const loggedInUser = req.user;
     const loggedInUserCart = req.user.cartData;
-    const { productId, quantity = 1 } = req.body;
+    const { productId, size, quantity = 1 } = req.body;
 
     const productExist = await Product.findById(productId);
     if (!productExist) {
       return next(createError(404, "Product not found"));
     }
 
+    const sizeExist = productExist.sizes.find((s) => s.size === size);
+
+    if (!sizeExist) {
+      return next(createError(400, "Invalid size"));
+    }
+
     let existingItem = loggedInUserCart.find(
-      (item) => item.product.toString() === productId,
+      (item) => item.product.toString() === productId && item.size === size,
     );
     if (!existingItem) {
       loggedInUserCart.push({
         product: productId,
-        quantity: quantity,
+        size,
+        quantity,
       });
     } else {
       existingItem.quantity += quantity;
@@ -57,7 +64,7 @@ export const getCart = async (req, res, next) => {
 export const updateCart = async (req, res, next) => {
   try {
     const loggedInUser = req.user;
-    const { productId } = req.params;
+    const { productId, size } = req.params;
     const { quantity } = req.body;
 
     const productExist = await Product.findById(productId);
@@ -66,7 +73,7 @@ export const updateCart = async (req, res, next) => {
     }
 
     const existCart = loggedInUser.cartData.find(
-      (item) => item.product.toString() === productId,
+      (item) => item.product.toString() === productId && item.size === size,
     );
     if (!existCart) {
       return next(createError(404, "Product not found"));
@@ -76,12 +83,11 @@ export const updateCart = async (req, res, next) => {
       return next(createError(400, "Quantity must be an positive number"));
     }
 
-    if (productExist.stockQuantity < quantity) {
-      return next(
-        createError(400, `Only ${productExist.stockQuantity} items available`),
-      );
-    }
+    const sizeStock = productExist.sizes.find((s) => s.size === size);
 
+    if (sizeStock.stock < quantity) {
+      return next(createError(400, `Only ${sizeStock.stock} items available`));
+    }
     if (quantity === 0) {
       loggedInUser.cartData = loggedInUser.cartData.filter(
         (item) => item.product.toString() !== productId,
@@ -103,22 +109,25 @@ export const updateCart = async (req, res, next) => {
 
 export const removeCart = async (req, res, next) => {
   try {
-
     const loggedInUser = req.user;
-    const {productId} = req.params;
+    const { productId , size } = req.params;
 
-    const cartItem = loggedInUser.cartData.find(item => item.product.toString() === productId);
-    if(!cartItem){
-      return next(createError(404 , "Product not found"))
+    const cartItem = loggedInUser.cartData.find(
+      (item) => item.product.toString() === productId && item.size === size
+    );
+    if (!cartItem) {
+      return next(createError(404, "Product not found"));
     }
 
-    loggedInUser.cartData =  loggedInUser.cartData.filter(item => item.product.toString() !== productId)    
-    
+    loggedInUser.cartData = loggedInUser.cartData.filter(
+      (item) => item.product.toString() !== productId && item.size !== size,
+    );
+
     await loggedInUser.save();
 
     res.json({
       message: "Item removed from cart",
-      data : loggedInUser.cartData
+      data: loggedInUser.cartData,
     });
   } catch (err) {
     next(err);

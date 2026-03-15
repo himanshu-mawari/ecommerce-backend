@@ -18,9 +18,9 @@ productRouter.post(
   ]),
   addProduct
 );
-productRouter.delete("/remove", removeProduct);
-productRouter.get("/:id", singleProduct);
-productRouter.get("/list", listProduct);
+productRouter.delete("/remove" , verifyAuth , verifyAdmin, removeProduct);
+productRouter.get("/:id", verifyAuth, singleProduct);
+productRouter.get("/list",verifyAuth, listProduct);
 
 
 export default productRouter; 

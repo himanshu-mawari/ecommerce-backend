@@ -3,16 +3,18 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import Product from "../models/product.js";
 import createError from "../helpers/createError.js";
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 export const addProduct = async (req, res, next) => {
   const uploadedImages = [];
 
   try {
     validateProductDetails(req.body, req.files);
+    console.log(req.body)
 
-    const { name, description, category, subCategory, price, stockQuantity } =
+    const { name, description, category, subCategory, price } =
       req.body;
+      const sizes = JSON.parse(req.body.sizes);
 
     const uploadPromises = Object.values(req.files).map(async (fileArr) => {
       const file = fileArr[0];
@@ -39,7 +41,7 @@ export const addProduct = async (req, res, next) => {
       category,
       subCategory,
       price,
-      stockQuantity,
+      sizes,
       images: uploadedImages,
     });
 
@@ -66,9 +68,9 @@ export const removeProduct = async (req, res, next) => {
       return next(createError(404, "Product doesn't exist"));
     }
 
-    const deletePromises = product.images.map((img) => {
-      cloudinary.uploader.destroy(img.public_id);
-    });
+    const deletePromises = product.images.map((img) =>
+      cloudinary.uploader.destroy(img.public_id),
+    );
 
     await Promise.all(deletePromises);
     await product.deleteOne();
