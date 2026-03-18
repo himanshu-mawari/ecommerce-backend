@@ -19,3 +19,7 @@
 - POST api/cart/update/:productId
 - DELETE api/cart/remove/:productId
 - GET api/cart/
+
+# orderRouter
+
+- POST api/order
