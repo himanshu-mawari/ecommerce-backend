@@ -8,7 +8,7 @@ export const addCartItem = async (req, res, next) => {
     const loggedInUser = req.user;
     const loggedInUserCart = req.user.cartData;
     const { productId, size, quantity = 1 } = req.body;
-
+    
     const productExist = await Product.findById(productId);
     if (!productExist) {
       return next(createError(404, "Product not found"));
@@ -64,8 +64,9 @@ export const getCart = async (req, res, next) => {
 export const updateCart = async (req, res, next) => {
   try {
     const loggedInUser = req.user;
-    const { productId, size } = req.params;
-    const { quantity } = req.body;
+    const { productId } = req.params;
+    const { quantity , size } = req.body;
+    
 
     const productExist = await Product.findById(productId);
     if (!productExist) {

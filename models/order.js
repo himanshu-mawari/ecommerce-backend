@@ -92,6 +92,18 @@ const orderSchema = mongoose.Schema(
       default: "pending",
       required: true,
     },
+    isPaid : {
+      type : Boolean,
+      default: false
+    },
+    paymentMethod : {
+      type : String,
+      enum : {
+        values : ["COD" , "ONLINE"],
+        message : `{VALUE} is not a valid payment method`
+      },
+      required: true
+    }
   },
   { timestamps: true },
 );
@@ -99,3 +111,4 @@ const orderSchema = mongoose.Schema(
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;
+ 

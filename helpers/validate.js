@@ -1,5 +1,6 @@
 import validator from "validator";
 import createError from "./createError.js";
+import Product from "../models/product.js";
 
 export const validateSignupDetails = ({ name, email, password }) => {
   if (!name || name.trim().length < 3) {
@@ -72,4 +73,58 @@ export const validateProductDetails = (
     seen.add(item.size);
   });
   return parsedSizes;
+};
+
+export const validateCartItems = async (cartItems) => {
+  const productIds = cartItems.map((p) => p.product);
+
+  const productsData = await Product.find({ _id: { $in: productIds } });
+
+  cartItems.forEach((item) => {
+    const product = productsData.find(
+      (p) => p._id.toString() === item.product.toString(),
+    );
+    if (!product) {
+      throw createError(404, `Product not found: ${item.product}`);
+    }
+    const variant = product.sizes.find((s) => s.size === item.size);
+    if (!variant) {
+      throw createError(404, `Size ${item.size} not available`);
+    }
+
+    if (item.quantity > variant.stock) {
+      throw createError(
+        400,
+        `Not enough stock for ${product.name} size ${item.size}`,
+      );
+    }
+  });
+};
+
+export const validateTransactionAddress = (data) => {
+  const { paymentMethod, shippingAddress } = data;
+
+  if (!paymentMethod) {
+    throw createError(400, "Payment method is required");
+  }
+
+  const validPaymentMethod = ["COD", "ONLINE"];
+  const checkPaymentMethod = validPaymentMethod.includes(paymentMethod);
+
+  if (!checkPaymentMethod) {
+    throw createError(400, "Invalid payment method");
+  }
+
+  if (!shippingAddress) {
+    throw createError(400, "Shipping address is required");
+  }
+
+  const requriedFields = ["street", "state", "city", "postalCode", "country"];
+  for (const field of requriedFields) {
+    if (!shippingAddress[field]) {
+      throw createError(400, `${field} is required`);
+    } else if (typeof shippingAddress[field] !== "string") {
+      throw new Error(`${field} must be a string`);
+    }
+  }
 };

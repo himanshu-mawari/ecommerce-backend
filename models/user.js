@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minLength: [2, "Name must be at least 2 characters"],
-    maxLength: [30, "Name cannot exceed 30 characters"]
+    maxLength: [30, "Name cannot exceed 30 characters"],
   },
 
   email: {
@@ -16,13 +16,13 @@ const userSchema = new mongoose.Schema({
     required: true,
     lowercase: true,
     trim: true,
-    unique: true
+    unique: true,
   },
 
   password: {
     type: String,
     required: true,
-    minLength: [8, "Password must be at least 8 characters"]
+    minLength: [8, "Password must be at least 8 characters"],
   },
 
   cartData: [
@@ -30,22 +30,25 @@ const userSchema = new mongoose.Schema({
       product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
-        required: true
+        required: true,
       },
       quantity: {
         type: Number,
         min: 1,
-        required: true
-      }
-    }
+        required: true,
+      },
+      size: {
+        type: String,
+        required: true,
+      },
+    },
   ],
 
   role: {
     type: String,
     enum: ["admin", "user"],
-    default: "user"
-  }
-
+    default: "user",
+  },
 });
 
 userSchema.methods.verifyPassword = async function (password) {

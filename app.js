@@ -7,6 +7,7 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 import productRouter from "./routes/productRoute.js";
 import cookieParser from "cookie-parser";
 import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
 const app = express();
 const ports = process.env.PORTS || 4000;
@@ -16,6 +17,7 @@ app.use(cookieParser())
 app.use("/api/user", authRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 app.use(errorMiddleware);
 
 const startServer = async () => {
