@@ -30,18 +30,6 @@ export const createOrder = async (req, res, next) => {
     const productMap = new Map();
     productsData.forEach((p) => productMap.set(p._id.toString(), p));
 
-    // reduce stock
-    for (const item of loggedInUserCart) {
-      const product = productMap.get(item.product.toString());
-
-      const variant = product.sizes.find((s) => s.size === item.size);
-      console.log(variant);
-
-      variant.stock -= item.quantity;
-
-      await product.save();
-    }
-
     const subTotal = loggedInUserCart.reduce((acc, item) => {
       const product = productMap.get(item.product.toString());
 
@@ -54,14 +42,16 @@ export const createOrder = async (req, res, next) => {
 
     const orderItems = loggedInUserCart.map((item) => {
       const product = productMap.get(item.product.toString());
-
+      
       if (!product) {
         throw createError(404, "Product not found");
       }
+     
 
       return {
         productId: product._id,
         name: product.name,
+        image : product.images[0].url,
         size: item.size,
         quantity: item.quantity,
         price: product.price,
@@ -71,6 +61,7 @@ export const createOrder = async (req, res, next) => {
     const shippingFee = 50;
     const totalAmount = subTotal + shippingFee;
 
+
     const order = await Order.create({
       userId: loggedInUserId,
       items: orderItems,
@@ -78,8 +69,38 @@ export const createOrder = async (req, res, next) => {
       subTotal,
       shippingFee,
       totalAmount,
-      paymentMethod,
+      paymentDetails: {
+        method : paymentMethod
+      },
+        paidAt: null,
+  shippedAt: null
     });
+
+    if (paymentMethod === "COD") {
+      for (const item of loggedInUserCart) {
+        const product = productMap.get(item.product.toString());
+        if (!product) {
+          throw createError(404, "Product not found");
+        }
+
+        const variant = product.sizes.find((s) => s.size === item.size);
+        if (!variant) {
+          throw createError(404, "Selected size not available");
+        }
+
+        if (item.quantity > variant.stock) {
+          throw createError(
+            400,
+            `Not enough stock for ${product.name} size ${item.size}`,
+          );
+        }
+        variant.stock -= item.quantity;
+
+        await product.save();
+      }
+    };
+
+    if(paymentMethod === "ONLINE"){}
 
     loggedInUser.cartData = [];
     await loggedInUser.save();
@@ -87,6 +108,29 @@ export const createOrder = async (req, res, next) => {
     res.json({
       message: "Successfully order created",
       data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const userOrders = async (req, res, next) => {
+  try {
+    const loggedInUserId = req.user._id;
+
+    const getUserOrders = await Order.find({ userId: loggedInUserId })
+      .sort({ createdAt: -1 })
+
+
+    if (getUserOrders.length === 0) {
+      return res.json({
+        message: "No orders found",
+        data: [],
+      });
+    }
+    res.json({
+      message: "User orders fetched successfully",
+      data: getUserOrders,
     });
   } catch (err) {
     next(err);

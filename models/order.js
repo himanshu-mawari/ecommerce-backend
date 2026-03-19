@@ -18,6 +18,10 @@ const orderSchema = mongoose.Schema(
           type: String,
           required: true,
         },
+        image: {
+          type: String,
+          required: true,
+        },
         size: {
           type: String,
           enum: {
@@ -46,6 +50,7 @@ const orderSchema = mongoose.Schema(
       phone: {
         type: String,
         required: true,
+        match: [/^[0-9]{10}$/, "Invalid phone number"],
       },
       street: {
         type: String,
@@ -92,18 +97,37 @@ const orderSchema = mongoose.Schema(
       default: "pending",
       required: true,
     },
-    isPaid : {
-      type : Boolean,
-      default: false
-    },
-    paymentMethod : {
-      type : String,
-      enum : {
-        values : ["COD" , "ONLINE"],
-        message : `{VALUE} is not a valid payment method`
+    paymentDetails: {
+      status: {
+        type: String,
+        enum: {
+          values: ["pending", "paid", "failed"],
+          message: `{VALUE} is not a valid payment status`,
+        },
+        default: "pending",
       },
-      required: true
-    }
+      method: {
+        type: String,
+        enum: {
+          values: ["COD", "ONLINE"],
+          message: `{VALUE} is not a valid payment method`,
+        },
+        required: true,
+      },
+    },
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+    paidAt: {
+      type: Date,
+    },
+    shippedAt: {
+      type: Date,
+    },
+    deliveredAt: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );
@@ -111,4 +135,3 @@ const orderSchema = mongoose.Schema(
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;
- 
