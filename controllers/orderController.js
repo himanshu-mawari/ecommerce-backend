@@ -5,6 +5,7 @@ import {
 } from "../helpers/validate.js";
 import Product from "../models/product.js";
 import Order from "../models/order.js";
+import mongoose from "mongoose";
 
 export const createOrder = async (req, res, next) => {
   try {
@@ -42,16 +43,15 @@ export const createOrder = async (req, res, next) => {
 
     const orderItems = loggedInUserCart.map((item) => {
       const product = productMap.get(item.product.toString());
-      
+
       if (!product) {
         throw createError(404, "Product not found");
       }
-     
 
       return {
         productId: product._id,
         name: product.name,
-        image : product.images[0].url,
+        image: product.images[0].url,
         size: item.size,
         quantity: item.quantity,
         price: product.price,
@@ -61,7 +61,6 @@ export const createOrder = async (req, res, next) => {
     const shippingFee = 50;
     const totalAmount = subTotal + shippingFee;
 
-
     const order = await Order.create({
       userId: loggedInUserId,
       items: orderItems,
@@ -70,10 +69,10 @@ export const createOrder = async (req, res, next) => {
       shippingFee,
       totalAmount,
       paymentDetails: {
-        method : paymentMethod
+        method: paymentMethod,
       },
-        paidAt: null,
-  shippedAt: null
+      paidAt: null,
+      shippedAt: null,
     });
 
     if (paymentMethod === "COD") {
@@ -98,9 +97,10 @@ export const createOrder = async (req, res, next) => {
 
         await product.save();
       }
-    };
+    }
 
-    if(paymentMethod === "ONLINE"){}
+    if (paymentMethod === "ONLINE") {
+    }
 
     loggedInUser.cartData = [];
     await loggedInUser.save();
@@ -119,8 +119,8 @@ export const userOrders = async (req, res, next) => {
     const loggedInUserId = req.user._id;
 
     const getUserOrders = await Order.find({ userId: loggedInUserId })
-      .sort({ createdAt: -1 })
-
+      .select("items status createdAt paymentDetails totalAmount")
+      .sort({ createdAt: -1 });
 
     if (getUserOrders.length === 0) {
       return res.json({
@@ -131,6 +131,32 @@ export const userOrders = async (req, res, next) => {
     res.json({
       message: "User orders fetched successfully",
       data: getUserOrders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const singleOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const loggedInUserId = req.user._id
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return next(createError(400, "Invalid order ID"));
+    }
+
+    const order = await Order.findOne({
+      _id : orderId,
+      userId : loggedInUserId 
+    });
+    if (!order) {
+      throw createError(404, "Order not found");
+    }
+
+    res.json({
+      message: "Order fetched Successfully",
+      data: order,
     });
   } catch (err) {
     next(err);

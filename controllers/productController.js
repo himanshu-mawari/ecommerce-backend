@@ -102,13 +102,13 @@ export const listProduct = async (req, res, next) => {
 
 export const singleProduct = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { productId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
       return next(createError(400, "Invalid product ID"));
     }
 
-    const findProduct = await Product.findById(id);
+    const findProduct = await Product.findById(productId);
 
     if (!findProduct) {
       return next(createError(404, "Product does not exist from these id"));

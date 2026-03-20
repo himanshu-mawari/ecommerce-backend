@@ -24,3 +24,4 @@
 
 - POST api/order
 - GET api/order/user-orders
+- GET api/order/:orderId

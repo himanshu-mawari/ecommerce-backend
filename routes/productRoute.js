@@ -19,7 +19,7 @@ productRouter.post(
   addProduct
 );
 productRouter.delete("/remove" , verifyAuth , verifyAdmin, removeProduct);
-productRouter.get("/:id", verifyAuth, singleProduct);
+productRouter.get("/:productId", verifyAuth, singleProduct);
 productRouter.get("/list",verifyAuth, listProduct);
 
 
