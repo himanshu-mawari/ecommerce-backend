@@ -128,6 +128,9 @@ const orderSchema = mongoose.Schema(
     deliveredAt: {
       type: Date,
     },
+    cancelledAt: {
+      type: Date
+    }
   },
   { timestamps: true },
 );

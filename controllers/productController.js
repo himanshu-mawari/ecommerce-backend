@@ -10,7 +10,7 @@ export const addProduct = async (req, res, next) => {
 
   try {
     validateProductDetails(req.body, req.files);
-    console.log(req.body)
+    
 
     const { name, description, category, subCategory, price } =
       req.body;
