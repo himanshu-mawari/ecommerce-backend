@@ -60,9 +60,9 @@ export const addProduct = async (req, res, next) => {
 
 export const removeProduct = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { productId } = req.params;
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(productId);
 
     if (!product) {
       return next(createError(404, "Product doesn't exist"));

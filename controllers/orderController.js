@@ -165,14 +165,11 @@ export const singleOrder = async (req, res, next) => {
     next(err);
   }
 };
+
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-
-    if (req.user.role !== "admin") {
-      return next(createError(403, "Admin access required"));
-    }
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
@@ -230,6 +227,47 @@ export const updateOrderStatus = async (req, res, next) => {
 
     res.json({
       message: "Order status updated successfully",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const cancelOrder = async (req, res, next) => {
+  try {
+    const loggedInUserId = req.user._id;
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return next(createError(400, "Invalid order ID"));
+    }
+
+    if (status !== "cancelled") {
+      return next(createError(400, "Invalid order status"));
+    }
+
+    const order = await Order.findOne({
+      userId: loggedInUserId,
+      _id: orderId,
+    });
+
+    if (!order) {
+      return next(createError(404, "Order not found"));
+    }
+
+    const allowedStatus = ["pending" , "confirmed"];
+    if(!allowedStatus.includes(order.status)){
+      return next(createError(400, "Order cannot be cancelled at this stage"));
+
+    }
+    
+    order.status = status;
+    await order.save();
+
+    res.json({
+      message: "Order cancelled successfully",
       data: order,
     });
   } catch (err) {

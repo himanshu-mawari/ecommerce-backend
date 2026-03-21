@@ -18,7 +18,7 @@ productRouter.post(
   ]),
   addProduct
 );
-productRouter.delete("/remove" , verifyAuth , verifyAdmin, removeProduct);
+productRouter.delete("/remove/:productId" , verifyAuth , verifyAdmin, removeProduct);
 productRouter.get("/:productId", verifyAuth, singleProduct);
 productRouter.get("/list",verifyAuth, listProduct);
 

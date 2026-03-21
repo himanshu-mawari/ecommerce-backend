@@ -26,3 +26,4 @@
 - GET api/order/user-orders
 - GET api/order/:orderId
 - PATCH api/order/:orderId/status
+- PATCH api/order/:orderId/cancel
