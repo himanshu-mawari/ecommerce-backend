@@ -9,7 +9,7 @@
 # productRouter
 
 - POST /api/products/add
-- DELETE /api/products/remove
+- DELETE /api/products/remove/:productId
 - GET /api/products/:id
 - GET /api/products/list
 
@@ -27,3 +27,4 @@
 - GET api/order/:orderId
 - PATCH api/order/:orderId/status
 - PATCH api/order/:orderId/cancel
+- GET api/order/all-orders

@@ -142,6 +142,7 @@ export const userOrders = async (req, res, next) => {
 
 export const singleOrder = async (req, res, next) => {
   try {
+    console.log("Im single order api");
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
 
@@ -257,18 +258,41 @@ export const cancelOrder = async (req, res, next) => {
       return next(createError(404, "Order not found"));
     }
 
-    const allowedStatus = ["pending" , "confirmed"];
-    if(!allowedStatus.includes(order.status)){
+    const allowedStatus = ["pending", "confirmed"];
+    if (!allowedStatus.includes(order.status)) {
       return next(createError(400, "Order cannot be cancelled at this stage"));
-
     }
-    
+
     order.status = status;
     await order.save();
 
     res.json({
       message: "Order cancelled successfully",
       data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const allOrders = async (req, res, next) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 10);
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      Order.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Order.countDocuments(),
+    ]);
+
+    res.json({
+      message: "Successfully send all orders",
+      page,
+      total,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data: orders,
     });
   } catch (err) {
     next(err);
