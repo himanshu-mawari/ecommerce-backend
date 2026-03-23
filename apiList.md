@@ -1,30 +1,50 @@
-# E-COMMERCE APIs
+# 📚 API Reference – E-Commerce Backend
 
-# authRouter
+This document lists all available API endpoints for the e-commerce backend.
 
-- POST api/user/signup
-- POST api/user/login
-- POST api/user/logout
+---
 
-# productRouter
+## 🔐 Auth Routes
 
-- POST /api/products/add
-- DELETE /api/products/remove/:productId
-- GET /api/products/:id
-- GET /api/products/list
+| Method | Endpoint         | Description         |
+| ------ | ---------------- | ------------------- |
+| POST   | /api/user/signup | Register a new user |
+| POST   | /api/user/login  | Authenticate user   |
+| POST   | /api/user/logout | Logout user         |
 
-# cartRouter
+---
 
-- POST api/cart/add
-- POST api/cart/update/:productId
-- DELETE api/cart/remove/:productId
-- GET api/cart/
+## 📦 Product Routes
 
-# orderRouter
+| Method | Endpoint                        | Description             |
+| ------ | ------------------------------- | ----------------------- |
+| POST   | /api/products/add               | Add new product (Admin) |
+| DELETE | /api/products/remove/:productId | Delete a product (Admin)        |
+| GET    | /api/products/:id               | Get product by ID       |
+| GET    | /api/products/list              | Get all products        |
 
-- POST api/order
-- GET api/order/user-orders
-- GET api/order/:orderId
-- PATCH api/order/:orderId/status
-- PATCH api/order/:orderId/cancel
-- GET api/order/all-orders
+---
+
+## 🛒 Cart Routes
+
+| Method | Endpoint                    | Description             |
+| ------ | --------------------------- | ----------------------- |
+| POST   | /api/cart/add               | Add item to cart        |
+| POST   | /api/cart/update/:productId | Update item quantity    |
+| DELETE | /api/cart/remove/:productId | Remove item from cart   |
+| GET    | /api/cart/                  | Get current user's cart |
+
+---
+
+## 📦 Order Routes
+
+| Method | Endpoint                   | Description                 |
+| ------ | -------------------------- | --------------------------- |
+| POST   | /api/order                 | Create a new order          |
+| GET    | /api/order/user-orders     | Get logged-in user's orders |
+| GET    | /api/order/:orderId        | Get order by ID             |
+| PATCH  | /api/order/:orderId/status | Update order status (Admin) |
+| PATCH  | /api/order/:orderId/cancel | Cancel an order             |
+| GET    | /api/order/all-orders      | Get all orders (Admin)      |
+
+---
