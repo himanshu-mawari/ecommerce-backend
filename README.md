@@ -54,7 +54,7 @@ Full API reference is available in:
    ```
 
 Server will start at: 👉 http://localhost:5000
-
+(by default)
 
 ---
 ## 📌 Environment Variables
