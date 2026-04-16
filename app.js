@@ -8,9 +8,18 @@ import productRouter from "./routes/productRoute.js";
 import cookieParser from "cookie-parser";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import cors from "cors";
 
 const app = express();
 const ports = process.env.PORTS || 4000;
+
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true, // tells the browser that the se rver allows cookies or authentication credentials to be sent and received from that origin
+  }),
+);
 
 app.use(express.json());
 app.use(cookieParser())
