@@ -64,7 +64,7 @@ export const signupUser = async (req, res, next) => {
   }
 };
 
-export const logout = (res) => {
+export const logout = (req, res, next) => {
   try {
     res.clearCookie("token");
 
