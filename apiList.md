@@ -8,9 +8,17 @@ This document lists all available API endpoints for the e-commerce backend.
 
 | Method | Endpoint         | Description         |
 | ------ | ---------------- | ------------------- |
-| POST   | /api/user/signup | Register a new user |
-| POST   | /api/user/login  | Authenticate user   |
-| POST   | /api/user/logout | Logout user         |
+| POST   | /api/auth/signup | Register a new user |
+| POST   | /api/auth/login  | Authenticate user   |
+| POST   | /api/auth/logout | Logout user         |
+
+---
+## 👤 Profile Routes
+
+| Method | Endpoint                  | Description                      |
+|--------|---------------------------|----------------------------------|
+| GET    | /api/user/profile         | Get logged-in user profile       |
+| PATCH  | /api/user/profile/update  | Update user profile (partial)    |
 
 ---
 
