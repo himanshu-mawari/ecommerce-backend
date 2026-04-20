@@ -6,7 +6,7 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
       minLength: [3, "Product name must be at least contain 3 characters"],
-      maxLength: [30, "Product name must be at most contain 30 characters"],
+      maxLength: [40, "Product name must be at most contain 40 characters"],
     },
     description: {
       type: String,
@@ -52,6 +52,10 @@ const productSchema = mongoose.Schema(
         },
       },
     ],
+    bestSeller: {
+      type : String ,
+      default : false
+    }
   },
   { timestamps: true },
 );

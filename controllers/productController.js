@@ -10,11 +10,9 @@ export const addProduct = async (req, res, next) => {
 
   try {
     validateProductDetails(req.body, req.files);
-    
 
-    const { name, description, category, subCategory, price } =
-      req.body;
-      const sizes = JSON.parse(req.body.sizes);
+    const { name, description, category, subCategory, price } = req.body;
+    const sizes = JSON.parse(req.body.sizes);
 
     const uploadPromises = Object.values(req.files).map(async (fileArr) => {
       const file = fileArr[0];
@@ -87,10 +85,31 @@ export const listProduct = async (req, res, next) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const { category, bestSeller, search } = req.query;
 
     const skip = (page - 1) * limit;
 
-    const allProducts = await Product.find({}).skip(skip).limit(limit).lean();
+    const filter = {};
+
+    if (category) {
+      filter.category = category;
+    }
+    if (bestSeller) {
+      filter.bestSeller = bestSeller === "true";
+    }
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const allProducts = await Product.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json({
       message: "Successfully send list of products",
       data: allProducts,

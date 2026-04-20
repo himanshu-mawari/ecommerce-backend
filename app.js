@@ -18,15 +18,15 @@ const ports = process.env.PORTS || 4000;
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials: true, // tells the browser that the se rver allows cookies or authentication credentials to be sent and received from that origin
+    credentials: true, // tells the browser that the server allows cookies or authentication credentials to be sent and received from that origin
   }),
 );
 
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser()) 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
-app.use("/api/products", productRouter);
+app.use("/api/products", productRouter); 
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 app.use(errorMiddleware);

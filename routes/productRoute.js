@@ -1,4 +1,4 @@
-import { addProduct , removeProduct , singleProduct , listProduct } from "../controllers/productController.js";
+import { addProduct , removeProduct , singleProduct , listProduct  } from "../controllers/productController.js";
 import express from "express";
 import upload from "../middlewares/multerMiddleware.js"; 
 import verifyAuth from "../middlewares/verifyAuth.js";
@@ -18,9 +18,9 @@ productRouter.post(
   ]),
   addProduct
 );
+productRouter.get("/list",verifyAuth, listProduct);
 productRouter.delete("/remove/:productId" , verifyAuth , verifyAdmin, removeProduct);
 productRouter.get("/:productId", verifyAuth, singleProduct);
-productRouter.get("/list",verifyAuth, listProduct);
 
 
 export default productRouter; 

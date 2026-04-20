@@ -131,14 +131,18 @@ export const validateTransactionAddress = (data) => {
 
 export const validateUpdatesData = (data) => {
   const { phone, email } = data;
-  const checkPhoneNumber = validator.isMobilePhone(phone);
-  const checkEmail = validator.isEmail(email);
 
-  if (!checkPhoneNumber) {
-    throw createError(400, "Invalid phone number");
+  if (phone !== undefined) {
+    const isValidPhone = validator.isMobilePhone(phone, "en-IN");
+    if (!isValidPhone) {
+      throw createError(400, "Invalid phone number");
+    }
   }
 
-  if (!checkEmail) {
-    throw createError(400, "Invalid email address");
+  if (email !== undefined) {
+    const isValidEmail = validator.isEmail(email);
+    if (!isValidEmail) {
+      throw createError(400, "Invalid email address");
+    }
   }
 };
