@@ -1,4 +1,4 @@
-import { addProduct , removeProduct , singleProduct , listProduct  } from "../controllers/productController.js";
+import { addProduct , removeProduct , singleProduct , listProduct , homeProduct } from "../controllers/productController.js";
 import express from "express";
 import upload from "../middlewares/multerMiddleware.js"; 
 import verifyAuth from "../middlewares/verifyAuth.js";
@@ -6,6 +6,7 @@ import verifyAdmin from "../middlewares/verifyAdmin.js";
 
 const productRouter = express.Router();
 
+productRouter.get("/home",verifyAuth, homeProduct);
 productRouter.post(
   "/add", 
   verifyAuth,

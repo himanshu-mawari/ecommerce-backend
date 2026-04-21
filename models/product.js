@@ -16,7 +16,7 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Men", "Women", "Kids"],
+        values: ["men", "women", "kids"],
         message: `{VALUE} is not a valid category`,
       },
     },
@@ -38,12 +38,12 @@ const productSchema = mongoose.Schema(
     sizes: [
       {
         size: {
-          type : String,
+          type: String,
           enum: {
             values: ["S", "M", "L", "XL", "XXL"],
             message: `{VALUE} is not a valid size`,
           },
-          required : true
+          required: true,
         },
         stock: {
           type: Number,
@@ -52,10 +52,15 @@ const productSchema = mongoose.Schema(
         },
       },
     ],
+    collectionType: {
+      type: String,
+      enum: ["winter-collection", "summer-collection", "festive-collection"],
+      default: null,
+    },
     bestSeller: {
-      type : String ,
-      default : false
-    }
+      type: String,
+      default: false,
+    },
   },
   { timestamps: true },
 );

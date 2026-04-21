@@ -33,7 +33,7 @@ export const validateProductDetails = (
   if (!category) {
     throw createError(400, "Category is required");
   }
-  if (!["Men", "Women", "Kids"].includes(category)) {
+  if (!["men", "women", "kids"].includes(category)) {
     throw createError(400, "Invalid category");
   }
   if (!subCategory?.trim()) {
