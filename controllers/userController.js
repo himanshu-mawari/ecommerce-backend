@@ -24,13 +24,13 @@ export const updateUserData = async (req, res, next) => {
     const loggedInUser = req.user;
     const updatesData = req.body;
     const allowedFields = ["name", "email", "phone"];
-
+ 
     const updates = {};
     
 
     for (let key of allowedFields) {
       if (req.body[key] !== undefined) {
-        updates[key] = req.body[key];
+        updates[key] = req.body[key]; 
       }
     }
 

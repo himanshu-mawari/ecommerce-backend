@@ -30,6 +30,8 @@ This document lists all available API endpoints for the e-commerce backend.
 | DELETE | /api/products/remove/:productId | Delete a product (Admin)        |
 | GET    | /api/products/:id               | Get product by ID       |
 | GET    | /api/products/list              | Get all products        |
+| GET    | /api/products/home              | Get home page products        |
+| GET    | /api/products/related-product/:productId             | Get related products        |
 
 ---
 

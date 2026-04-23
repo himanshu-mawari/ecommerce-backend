@@ -2,13 +2,12 @@ import Product from "../models/product.js";
 import createError from "../helpers/createError.js";
 import User from "../models/user.js";
 
-// Add item to user cart
 export const addCartItem = async (req, res, next) => {
   try {
     const loggedInUser = req.user;
     const loggedInUserCart = req.user.cartData;
     const { productId, size, quantity = 1 } = req.body;
-    
+
     const productExist = await Product.findById(productId);
     if (!productExist) {
       return next(createError(404, "Product not found"));
@@ -44,7 +43,6 @@ export const addCartItem = async (req, res, next) => {
   }
 };
 
-// View user cart
 export const getCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate("cartData.product");
@@ -59,49 +57,55 @@ export const getCart = async (req, res, next) => {
     next(err);
   }
 };
-
-// Update cart item quantity
 export const updateCart = async (req, res, next) => {
   try {
-    const loggedInUser = req.user;
+    const user = req.user;
     const { productId } = req.params;
-    const { quantity , size } = req.body;
-    
+    const { quantity, size } = req.body;
 
-    const productExist = await Product.findById(productId);
-    if (!productExist) {
-      return next(createError(404, "Product doesn't exist"));
+    if (!Number.isInteger(quantity) || quantity < 0) {
+      return next(
+        createError(400, "Quantity must be a valid non-negative number"),
+      );
     }
 
-    const existCart = loggedInUser.cartData.find(
+    const product = await Product.findById(productId).select("sizes");
+    if (!product) {
+      return next(createError(404, "Product doesn't exist"));
+    } 
+
+    const sizeStock = product.sizes.find((s) => s.size === size);
+    if (!sizeStock) {
+      return next(createError(404, "Size not found"));
+    }
+
+    const cartItem = user.cartData.find(
       (item) => item.product.toString() === productId && item.size === size,
     );
-    if (!existCart) {
-      return next(createError(404, "Product not found"));
+
+    if (!cartItem) {
+      return next(createError(404, "Item not in cart"));
     }
 
-    if (isNaN(quantity) || quantity < 0) {
-      return next(createError(400, "Quantity must be an positive number"));
-    }
-
-    const sizeStock = productExist.sizes.find((s) => s.size === size);
-
-    if (sizeStock.stock < quantity) {
+    if (quantity > sizeStock.stock) {
       return next(createError(400, `Only ${sizeStock.stock} items available`));
     }
+
     if (quantity === 0) {
-      loggedInUser.cartData = loggedInUser.cartData.filter(
-        (item) => item.product.toString() !== productId,
+      user.cartData = user.cartData.filter(
+        (item) =>
+          !(item.product.toString() === productId && item.size === size),
       );
     } else {
-      existCart.quantity = quantity;
+      cartItem.quantity = quantity;
     }
 
-    await loggedInUser.save();
+    await user.save();
 
-    res.json({
-      message: "Successfully updated cart",
-      data: loggedInUser.cartData,
+    res.status(200).json({
+      success: true,
+      message: "Cart updated successfully",
+      data: user.cartData,
     });
   } catch (err) {
     next(err);
@@ -111,10 +115,10 @@ export const updateCart = async (req, res, next) => {
 export const removeCart = async (req, res, next) => {
   try {
     const loggedInUser = req.user;
-    const { productId , size } = req.params;
+    const { productId, size } = req.params;
 
     const cartItem = loggedInUser.cartData.find(
-      (item) => item.product.toString() === productId && item.size === size
+      (item) => item.product.toString() === productId && item.size === size,
     );
     if (!cartItem) {
       return next(createError(404, "Product not found"));

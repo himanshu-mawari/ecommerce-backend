@@ -9,4 +9,4 @@ cartRouter.get("/" , verifyAuth , getCart);
 cartRouter.post("/update/:productId" , verifyAuth , updateCart);
 cartRouter.delete("/remove/:productId" , verifyAuth , removeCart);
 
-export default cartRouter;
+export default cartRouter; 

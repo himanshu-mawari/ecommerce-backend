@@ -11,8 +11,9 @@ export const addProduct = async (req, res, next) => {
   try {
     validateProductDetails(req.body, req.files);
 
-    const { name, description, category, subCategory, price , collectionType } = req.body;
-    console.log(category)
+    const { name, description, category, subCategory, price, collectionType } =
+      req.body;
+    console.log(category);
     const sizes = JSON.parse(req.body.sizes);
 
     const uploadPromises = Object.values(req.files).map(async (fileArr) => {
@@ -87,8 +88,16 @@ export const listProduct = async (req, res, next) => {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-    const { category, bestSeller, search, sort, minPrice, maxPrice , collectionType , gender } =
-      req.query;
+    const {
+      category,
+      bestSeller,
+      search,
+      sort,
+      minPrice,
+      maxPrice,
+      collectionType,
+      gender,
+    } = req.query;
 
     const skip = (page - 1) * limit;
 
@@ -101,7 +110,7 @@ export const listProduct = async (req, res, next) => {
     if (bestSeller) {
       filter.bestSeller = bestSeller === "true";
     }
-   
+
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -122,9 +131,9 @@ export const listProduct = async (req, res, next) => {
         filter.price.$gte = minPrice;
       }
     }
-if (collectionType) {
-  filter.collectionType = collectionType;
-}
+    if (collectionType) {
+      filter.collectionType = collectionType;
+    }
 
     const allProducts = await Product.find(filter)
       .sort(sortOption)
@@ -162,15 +171,14 @@ export const singleProduct = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}; 
+};
 export const homeProduct = async (req, res, next) => {
   try {
     const latestProduct = await Product.find({})
       .sort({ createdAt: -1 })
       .limit(8);
 
-    const bestSeller = await Product.find({ bestSeller: true })
-      .limit(8);
+    const bestSeller = await Product.find({ bestSeller: true }).limit(8);
 
     res.json({
       message: "Successfully fetched home products",
@@ -179,7 +187,55 @@ export const homeProduct = async (req, res, next) => {
         bestSeller: bestSeller,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+};
 
+export const relatedProducts = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+
+    const activeProduct = await Product.findById(productId);
+
+    if (!activeProduct) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    let relatedProducts = [];
+
+    if (activeProduct.collectionType) { // if not null it collects "winter collection"
+      relatedProducts = await Product.find({
+        _id: { $ne: productId },
+        collectionType: activeProduct.collectionType,
+      });
+    }
+
+    if (relatedProducts.length < 6) {
+      const extra = await Product.find({
+        _id: { $ne: productId },
+        category: activeProduct.category,
+        subCategory: activeProduct.subCategory,
+      }).limit(6 - relatedProducts.length);
+      relatedProducts = [...relatedProducts, ...extra];
+    }
+    if (relatedProducts.length < 6) {
+      const more = await Product.find({
+        _id: { $ne: productId },
+        category: activeProduct.category,
+      }).limit(6 - relatedProducts.length);
+
+      relatedProducts = [...relatedProducts, ...more];
+    }
+
+    console.log(relatedProducts);
+
+    res.json({
+      message: "Successfully fetched related products",
+      data: relatedProducts,
+    });
   } catch (err) {
     next(err);
   }
