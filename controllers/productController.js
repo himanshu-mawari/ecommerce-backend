@@ -204,38 +204,56 @@ export const relatedProducts = async (req, res, next) => {
       });
     }
 
-    let relatedProducts = [];
-
-    if (activeProduct.collectionType) { // if not null it collects "winter collection"
-      relatedProducts = await Product.find({
-        _id: { $ne: productId },
-        collectionType: activeProduct.collectionType,
-      });
-    }
-
-    if (relatedProducts.length < 6) {
-      const extra = await Product.find({
-        _id: { $ne: productId },
-        category: activeProduct.category,
-        subCategory: activeProduct.subCategory,
-      }).limit(6 - relatedProducts.length);
-      relatedProducts = [...relatedProducts, ...extra];
-    }
-    if (relatedProducts.length < 6) {
-      const more = await Product.find({
-        _id: { $ne: productId },
-        category: activeProduct.category,
-      }).limit(6 - relatedProducts.length);
-
-      relatedProducts = [...relatedProducts, ...more];
-    }
-
-    console.log(relatedProducts);
+    const relatedProducts = await Product.aggregate([
+      {
+        $match: {
+          _id: { $ne: new mongoose.Types.ObjectId(productId) },
+          category: activeProduct.category,
+        },
+      },
+      {
+        $addFields: {
+          priority: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $and: [
+                     {
+                        $eq: ["$collectionType", activeProduct.collectionType],
+                      },
+                      { $eq: ["$subCategory", activeProduct.subCategory] },
+                    ],
+                  },
+                  then: 1,
+                },
+                { 
+                  case: {
+                    $eq: ["$subCategory", activeProduct.subCategory],
+                  },
+                  then: 2,
+                },
+                {
+                  case: {
+                    $eq: ["$collectionType", activeProduct.collectionType],
+                  },
+                  then: 3,
+                },
+              ],
+              default: 4,
+            },
+          }, 
+        },
+      },
+      { $sort: { priority: 1 } },
+      { $limit: 6 },
+    ]);
 
     res.json({
       message: "Successfully fetched related products",
       data: relatedProducts,
     });
+
   } catch (err) {
     next(err);
   }

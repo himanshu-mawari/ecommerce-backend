@@ -146,3 +146,42 @@ export const validateUpdatesData = (data) => {
     }
   }
 };
+
+export const validateAddressDetails = ({
+  name,
+  phone,
+  pincode,
+  houseNo,
+  street,
+  district,
+  state,
+}) => {
+  if (!name || name.trim().length < 2) {
+    throw createError(400, "Name must be at least 2 characters");
+  }
+
+  if (!phone || !validator.isMobilePhone(phone, "en-IN")) {
+    throw createError(400, "Invalid phone number");
+  }
+
+  if (!pincode || !validator.isPostalCode(pincode, "IN")) {
+    throw createError(400, "Invalid pincode");
+  }
+
+  if (!houseNo || houseNo.trim().length < 1) {
+    throw createError(400, "House number is required");
+  }
+
+  if (!street || street.trim().length < 3) {
+    throw createError(400, "Street must be at least 3 characters");
+  }
+
+  if (!district || district.trim().length < 2) {
+    throw createError(400, "District is required");
+  }
+
+  if (!state || state.trim().length < 2) {
+    throw createError(400, "State is required");
+  }
+};
+

@@ -47,7 +47,7 @@ This document lists all available API endpoints for the e-commerce backend.
 ---
 
 ## 📦 Order Routes
-
+ 
 | Method | Endpoint                   | Description                 |
 | ------ | -------------------------- | --------------------------- |
 | POST   | /api/order                 | Create a new order          |
