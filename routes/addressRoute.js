@@ -1,9 +1,10 @@
 import express from "express";
 import verifyAuth from "../middlewares/verifyAuth.js";
-import {addAddress} from "../controllers/addressController.js"
+import {addAddress , getAllAddresses} from "../controllers/addressController.js"
 
 const addressRouter = express.Router();
 
-addressRouter.post("/add" , verifyAuth , addAddress)
+addressRouter.post("/" , verifyAuth , addAddress)
+addressRouter.get("/" , verifyAuth , getAllAddresses )
 
 export default addressRouter;

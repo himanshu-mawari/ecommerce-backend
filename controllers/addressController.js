@@ -30,3 +30,19 @@ export const addAddress = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getAllAddresses = async (req , res , next) => {
+  try{
+      const loggedInUserId = req.user._id;
+
+      const logggedInUserAddresses = await Address.find({userId:loggedInUserId});
+
+      res.json({
+        message: "Addresses fetched successfully",
+        data:logggedInUserAddresses
+      })
+
+  }catch(err){
+    next(err)
+  }
+}
