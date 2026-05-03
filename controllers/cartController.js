@@ -47,14 +47,27 @@ export const getCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate("cartData.product");
 
-    const cart = user.cartData;
+    const cartItems = user.cartData;
 
+    const subTotal = cartItems.reduce(
+      (acc, item) => acc + item.product.price * item.quantity,
+      0,
+    );
+    const shippingFee = 100;
+    const total = shippingFee + subTotal;
     res.json({
       message: "User cart",
-      data: cart,
-    });
+      data: {
+        items:cartItems,
+        summary: {
+          subTotal,
+          shippingFee,
+          total,
+        },
+      },
+    }); 
   } catch (err) {
-    next(err);
+    next(err); 
   }
 };
 export const updateCart = async (req, res, next) => {
@@ -62,7 +75,6 @@ export const updateCart = async (req, res, next) => {
     const user = req.user;
     const { cartItemId } = req.params;
     const { quantity } = req.body;
-
 
     if (!Number.isInteger(quantity) || quantity < 0) {
       return next(createError(400, "Invalid quantity"));
@@ -114,14 +126,14 @@ export const removeCart = async (req, res, next) => {
     }
 
     cartItem.deleteOne();
- 
+
     await loggedInUser.save();
 
     res.json({
       message: "Item removed from cart",
-      data: loggedInUser.cartData, 
+      data: loggedInUser.cartData,
     });
   } catch (err) {
     next(err);
-  } 
+  }
 };

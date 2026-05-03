@@ -33,6 +33,28 @@ export const addAddress = async (req, res, next) => {
   }
 };
 
+export const singleAddress = async (req, res, next) => {
+  try {
+    const { addressId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(addressId)) {
+      return next(createError(400, "Invalid address ID"));
+    }
+
+    const address = await Address.findById(addressId);
+    if (!address) {
+      return next(createError(404, "Address not found"));
+    }
+
+    res.json({
+      message: "Address fetched successfully",
+      data: address,
+    });
+  } catch (err) {
+    next(err)
+  }
+};
+
 export const getAllAddresses = async (req, res, next) => {
   try {
     const loggedInUserId = req.user._id;

@@ -100,12 +100,12 @@ export const createOrder = async (req, res, next) => {
 
         await product.save();
       }
+      loggedInUser.cartData = [];
     }
 
     if (paymentMethod === "ONLINE") {
     }
 
-    loggedInUser.cartData = [];
     await loggedInUser.save();
 
     res.json({
