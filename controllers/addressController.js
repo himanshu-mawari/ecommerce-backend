@@ -35,13 +35,17 @@ export const addAddress = async (req, res, next) => {
 
 export const singleAddress = async (req, res, next) => {
   try {
+    const loggedInUserId = req.user._id;
     const { addressId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(addressId)) {
       return next(createError(400, "Invalid address ID"));
     }
 
-    const address = await Address.findById(addressId);
+    const address = await Address.findOne({
+      _id: addressId,
+      userId: loggedInUserId,
+    });
     if (!address) {
       return next(createError(404, "Address not found"));
     }
@@ -51,7 +55,7 @@ export const singleAddress = async (req, res, next) => {
       data: address,
     });
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 

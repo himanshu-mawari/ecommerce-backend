@@ -6,6 +6,7 @@ import {
 import Product from "../models/product.js";
 import Order from "../models/order.js";
 import mongoose from "mongoose";
+import Address from "../models/address.js";
 
 export const createOrder = async (req, res, next) => {
   try {
@@ -14,10 +15,15 @@ export const createOrder = async (req, res, next) => {
     const loggedInUser = req.user;
     const loggedInUserId = req.user._id;
     const loggedInUserCart = req.user.cartData;
-    const { paymentMethod, shippingAddress } = req.body;
+    const { paymentMethod, shippingAddressId } = req.body;
+
+    
+    if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
+      return next(createError(400, "Invalid address ID"));
+    }
 
     if (!loggedInUserCart) {
-      return next(createError(400, "Cart not exists")); 
+      return next(createError(400, "Cart not exists"));
     } else if (loggedInUserCart.length === 0) {
       return next(createError(400, "Cart is empty"));
     }
@@ -61,10 +67,18 @@ export const createOrder = async (req, res, next) => {
     const shippingFee = 50;
     const totalAmount = subTotal + shippingFee;
 
+    const address = await Address.findOne({
+      _id: shippingAddressId,
+      userId: loggedInUserId,
+    });
+    if (!address) {
+      return next(createError(404, "Invalid or unauthorized address"));
+    }
+
     const order = await Order.create({
       userId: loggedInUserId,
       items: orderItems,
-      shippingAddress,
+      shippingAddress: address,
       subTotal,
       shippingFee,
       totalAmount,
@@ -86,11 +100,11 @@ export const createOrder = async (req, res, next) => {
 
         const variant = product.sizes.find((s) => s.size === item.size);
         if (!variant) {
-          return next(createError(404, "Selected size not available"));
+          return next(createError(404, "Selected size not valid"));
         }
 
         if (item.quantity > variant.stock) {
-          throw next(
+          return next(
             createError(
               (400, `Not enough stock for ${product.name} size ${item.size}`),
             ),

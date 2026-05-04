@@ -43,34 +43,53 @@ const orderSchema = mongoose.Schema(
       },
     ],
     shippingAddress: {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+      },
+
       name: {
         type: String,
         required: true,
+        trim: true,
       },
+
       phone: {
         type: String,
         required: true,
-        match: [/^[0-9]{10}$/, "Invalid phone number"],
+        match: /^[6-9]\d{9}$/,
       },
+
+      pincode: {
+        type: String,
+        required: true,
+        match: /^\d{6}$/,
+      },
+
+      houseNo: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+
       street: {
         type: String,
         required: true,
+        trim: true,
       },
-      city: {
+
+      district: {
         type: String,
         required: true,
+        trim: true,
       },
+
       state: {
         type: String,
         required: true,
-      },
-      postalCode: {
-        type: String,
-        required: true,
-      },
-      country: {
-        type: String,
-        required: true,
+        trim: true,
       },
     },
     subTotal: {
@@ -81,7 +100,7 @@ const orderSchema = mongoose.Schema(
     shippingFee: {
       type: Number,
       required: true,
-      min: 0, 
+      min: 0,
     },
     totalAmount: {
       type: Number,
@@ -129,8 +148,8 @@ const orderSchema = mongoose.Schema(
       type: Date,
     },
     cancelledAt: {
-      type: Date
-    }
+      type: Date,
+    },
   },
   { timestamps: true },
 );

@@ -102,7 +102,7 @@ export const validateCartItems = async (cartItems) => {
 };
 
 export const validateTransactionAddress = (data) => {
-  const { paymentMethod, shippingAddress } = data;
+  const { paymentMethod } = data;
 
   if (!paymentMethod) {
     throw createError(400, "Payment method is required");
@@ -113,19 +113,6 @@ export const validateTransactionAddress = (data) => {
 
   if (!checkPaymentMethod) {
     throw createError(400, "Invalid payment method");
-  }
-
-  if (!shippingAddress) {
-    throw createError(400, "Shipping address is required");
-  }
-
-  const requriedFields = ["street", "state", "city", "postalCode", "country"];
-  for (const field of requriedFields) {
-    if (!shippingAddress[field]) {
-      throw createError(400, `${field} is required`);
-    } else if (typeof shippingAddress[field] !== "string") {
-      throw new Error(`${field} must be a string`);
-    }
   }
 };
 
@@ -184,4 +171,3 @@ export const validateAddressDetails = ({
     throw createError(400, "State is required");
   }
 };
-
