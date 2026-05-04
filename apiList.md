@@ -22,6 +22,19 @@ This document lists all available API endpoints for the e-commerce backend.
 
 ---
 
+
+## 🏠 Address Routes
+
+| Method | Endpoint             | Description                     |
+|--------|----------------------|---------------------------------|
+| POST   | /api/address/add     | Add new address                 |
+| GET    | /api/address         | Get all user addresses          |
+| GET    | /api/address/:id     | Get single address (owned only) |
+| PATCH  | /api/address/:id     | Update address (owned only)     |
+| DELETE | /api/address/:id     | Delete address (owned only)     |
+
+---
+
 ## 📦 Product Routes
 
 | Method | Endpoint                        | Description             |

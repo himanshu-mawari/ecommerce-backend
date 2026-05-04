@@ -17,7 +17,7 @@ export const createOrder = async (req, res, next) => {
     const { paymentMethod, shippingAddress } = req.body;
 
     if (!loggedInUserCart) {
-      return next(createError(400, "Cart not exists"));
+      return next(createError(400, "Cart not exists")); 
     } else if (loggedInUserCart.length === 0) {
       return next(createError(400, "Cart is empty"));
     }
