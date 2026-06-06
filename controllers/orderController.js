@@ -17,7 +17,6 @@ export const createOrder = async (req, res, next) => {
     const loggedInUserCart = req.user.cartData;
     const { paymentMethod, shippingAddressId } = req.body;
 
-    
     if (!mongoose.Types.ObjectId.isValid(shippingAddressId)) {
       return next(createError(400, "Invalid address ID"));
     }
@@ -64,7 +63,7 @@ export const createOrder = async (req, res, next) => {
       };
     });
 
-    const shippingFee = 50;
+    const shippingFee = 100;
     const totalAmount = subTotal + shippingFee;
 
     const address = await Address.findOne({
@@ -75,8 +74,11 @@ export const createOrder = async (req, res, next) => {
       return next(createError(404, "Invalid or unauthorized address"));
     }
 
+    const orderId = Math.floor(10000 + Math.random() * 9000)
+
     const order = await Order.create({
       userId: loggedInUserId,
+      orderId,
       items: orderItems,
       shippingAddress: address,
       subTotal,
@@ -145,9 +147,13 @@ export const userOrders = async (req, res, next) => {
         data: [],
       });
     }
+
+    const total = await Order.countDocuments({ userId: loggedInUserId });
+
     res.json({
       message: "User orders fetched successfully",
       data: getUserOrders,
+      total,
     });
   } catch (err) {
     next(err);
@@ -156,7 +162,6 @@ export const userOrders = async (req, res, next) => {
 
 export const singleOrder = async (req, res, next) => {
   try {
-    console.log("Im single order api");
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
 
