@@ -150,6 +150,30 @@ export const listProduct = async (req, res, next) => {
   }
 };
 
+export const adminListProduct = async (req, res, next) => {
+  try {
+    const { category, search } = req.query;
+
+    let filters = {};
+
+    if (category) {
+      filters.category = category;
+    }
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filters.name = { $regex: escaped, $options: "i" };
+    }
+    const productList = await Product.find(filters);
+
+    res.json({
+      data: "hey this is adminListProduct, long time how r u!!!",
+      product: productList,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const singleProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
@@ -219,7 +243,7 @@ export const relatedProducts = async (req, res, next) => {
                 {
                   case: {
                     $and: [
-                     {
+                      {
                         $eq: ["$collectionType", activeProduct.collectionType],
                       },
                       { $eq: ["$subCategory", activeProduct.subCategory] },
@@ -227,7 +251,7 @@ export const relatedProducts = async (req, res, next) => {
                   },
                   then: 1,
                 },
-                { 
+                {
                   case: {
                     $eq: ["$subCategory", activeProduct.subCategory],
                   },
@@ -242,7 +266,7 @@ export const relatedProducts = async (req, res, next) => {
               ],
               default: 4,
             },
-          }, 
+          },
         },
       },
       { $sort: { priority: 1 } },
@@ -253,7 +277,6 @@ export const relatedProducts = async (req, res, next) => {
       message: "Successfully fetched related products",
       data: relatedProducts,
     });
-
   } catch (err) {
     next(err);
   }
