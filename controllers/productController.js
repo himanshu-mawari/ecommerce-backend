@@ -13,7 +13,6 @@ export const addProduct = async (req, res, next) => {
 
     const { name, description, category, subCategory, price, collectionType } =
       req.body;
-    console.log(category);
     const sizes = JSON.parse(req.body.sizes);
 
     const uploadPromises = Object.values(req.files).map(async (fileArr) => {
@@ -55,6 +54,54 @@ export const addProduct = async (req, res, next) => {
       uploadedImages.map((img) => cloudinary.uploader.destroy(img.public_id)),
     );
 
+    next(err);
+  }
+};
+
+export const updateProduct = async (req, res, next) => {
+  let updatedImage = [];
+  try {
+    const { productId } = req.params;
+
+    const productExist = await Product.findById(productId);
+    if (!productExist) {
+      return next(createError(404, "Product not found"));
+    }
+
+    const existedImage = productExist.images;
+
+    if (req.files && Object.keys(req.files).length > 0) {
+      for (let img of existedImage) {
+        await cloudinary.uploader.destroy(img.public_id);
+      }
+
+      const uploadPromises = Object.values(req.files).map(async (fileArr) => {
+        const file = fileArr[0];
+
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "products",
+        });
+
+        fs.unlinkSync(file.path);
+
+        return {
+          url: result.secure_url,
+          public_id: result.public_id,
+        };
+      });
+      const results = await Promise.all(uploadPromises);
+      updatedImage.push(...results);
+      productExist.images = updatedImage;
+    }
+
+    Object.keys(req.body).forEach((key) => (productExist[key] = req.body[key]));
+    await productExist.save();
+
+    res.json({
+        message: "Successfully update the product",
+        product: {fileData:req.files , bodyData:req.body},
+    });
+  } catch (err) {
     next(err);
   }
 };
