@@ -198,7 +198,7 @@ export const updateOrderStatus = async (req, res, next) => {
     const allowedStatus = [
       "pending",
       "confirmed",
-      "packing",
+      "packed",
       "shipped",
       "delivered",
       "cancelled",
@@ -220,8 +220,8 @@ export const updateOrderStatus = async (req, res, next) => {
 
     const statusFlow = {
       pending: ["confirmed", "cancelled"],
-      confirmed: ["packing", "cancelled"],
-      packing: ["shipped", "cancelled"],
+      confirmed: ["packed", "cancelled"],
+      packed: ["shipped", "cancelled"],
       shipped: ["delivered"],
       delivered: [],
       cancelled: [],

@@ -49,7 +49,7 @@ export const getdashboardData = async (req, res, next) => {
 
     const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
-    res.json({
+    res.json({  
       data: {
         stats: {
           totalProducts: productsCount,
@@ -59,7 +59,7 @@ export const getdashboardData = async (req, res, next) => {
           totalRevenue,
         },
         recentOrders,
-        lowStockProductCount,
+        lowStockProducts,
       },
     });
   } catch (err) {

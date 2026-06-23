@@ -10,27 +10,28 @@ import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/user.js";
 import addressRouter from "./routes/addressRoute.js";
+import dashboardRouter from "./routes/dashboard.js";
 import cors from "cors";
 
 const app = express();
 const ports = process.env.PORTS || 4000;
 
-
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials: true, 
+    credentials: true,
   }),
 );
 
 app.use(express.json());
-app.use(cookieParser()) 
+app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
-app.use("/api/products", productRouter); 
+app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-app.use("/api/address" , addressRouter);
+app.use("/api/address", addressRouter);
+app.use("/api/admin", dashboardRouter);
 app.use(errorMiddleware);
 
 const startServer = async () => {
@@ -46,5 +47,5 @@ const startServer = async () => {
     console.error("Startup failed: " + err.message);
   }
 };
- 
-startServer();  
+
+startServer();

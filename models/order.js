@@ -7,10 +7,10 @@ const orderSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
-    orderId:{
+    orderId: {
       type: Number,
-      required:true,
-      unique:true
+      required: true,
+      unique: true,
     },
     items: [
       {
@@ -35,7 +35,7 @@ const orderSchema = mongoose.Schema(
           },
           required: true,
         },
-        quantity: { 
+        quantity: {
           type: Number,
           required: true,
           min: 1,
@@ -115,7 +115,14 @@ const orderSchema = mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+        values: [
+          "pending",
+          "confirmed",
+          "packed",
+          "shipped",
+          "delivered",
+          "cancelled",
+        ],
         message: `{VALUE} is not a valid order status`,
       },
       default: "pending",

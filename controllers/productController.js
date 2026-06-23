@@ -98,8 +98,8 @@ export const updateProduct = async (req, res, next) => {
     await productExist.save();
 
     res.json({
-        message: "Successfully update the product",
-        product: {fileData:req.files , bodyData:req.body},
+      message: "Successfully update the product",
+      product: { fileData: req.files, bodyData: req.body },
     });
   } catch (err) {
     next(err);
@@ -199,13 +199,31 @@ export const listProduct = async (req, res, next) => {
 
 export const adminListProduct = async (req, res, next) => {
   try {
-    const { category, search } = req.query;
+    const {
+      category,
+      sub_category: subCategory,
+      stock_status: stockStatus,
+      search,
+    } = req.query;
 
     let filters = {};
 
     if (category) {
       filters.category = category;
     }
+
+    if (subCategory) {
+      filters.subCategory = { $regex: new RegExp(`^${subCategory}$`, "i") };
+    }
+    if (stockStatus) {
+      if (stockStatus === "low_stock") {
+        filters.sizes = { $elemMatch: { stock: { $lte: 5 } } };
+      }
+      if (stockStatus === "out_of_stock") {
+        filters.sizes = { $elemMatch: { stock: { $eq: 0 } } };
+      }
+    }
+
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filters.name = { $regex: escaped, $options: "i" };

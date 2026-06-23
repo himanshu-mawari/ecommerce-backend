@@ -70,4 +70,12 @@ This document lists all available API endpoints for the e-commerce backend.
 | PATCH  | /api/order/:orderId/cancel | Cancel an order             |
 | GET    | /api/order/all-orders      | Get all orders (Admin)      |
 
----
+--- 
+## 📦 Admin dashboard Routes
+ 
+| Method | Endpoint                   | Description                 |
+| ------ | -------------------------- | --------------------------- |
+| POST   | /api/order                 | Create a new order          |
+
+
+--- 
