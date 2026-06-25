@@ -3,6 +3,7 @@ import Product from "../models/product.js";
 import Order from "../models/order.js";
 
 export const getdashboardData = async (req, res, next) => {
+  const staleThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
   try {
     const [
       productsCount,
@@ -38,18 +39,41 @@ export const getdashboardData = async (req, res, next) => {
         .limit(5)
         .select(
           "orderId shippingAddress.name status paymentDetails.status totalAmount createdAt",
-        ).lean(),
+        )
+        .lean(),
       Product.find({
         "sizes.stock": { $lte: 5 },
       })
         .limit(5)
         .select("images name sizes")
         .lean(),
+      Order.countDocuments({
+        createdAt: { $lt: staleThreshold },
+      }),
     ]);
 
     const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
-    res.json({  
+    const transformedProducts = lowStockProducts.map((products) => {
+      const hasOutOfStock = products.sizes.some((size) => size.stock === 0);
+
+      let status = "";
+      if (hasOutOfStock) {
+        status = "Out of Stock";
+      } else {
+        status = "low stock";
+      }
+
+      const affectedSizes = products.sizes.filter((size) => size.stock <= 5);
+
+      return {
+        ...products,
+        status,
+        affectedSizes,
+      };
+    });
+
+    res.json({
       data: {
         stats: {
           totalProducts: productsCount,
@@ -59,7 +83,8 @@ export const getdashboardData = async (req, res, next) => {
           totalRevenue,
         },
         recentOrders,
-        lowStockProducts,
+        lowStockProducts: transformedProducts,
+        stalePendingCount: stuckPendingOrders,
       },
     });
   } catch (err) {
