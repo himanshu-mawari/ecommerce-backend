@@ -36,7 +36,7 @@ export const getdashboardData = async (req, res, next) => {
       ]),
       Order.find({})
         .sort({ createdAt: -1 })
-        .limit(5)
+        .limit(6)
         .select(
           "orderId shippingAddress.name status paymentDetails.status totalAmount createdAt",
         )
@@ -61,15 +61,23 @@ export const getdashboardData = async (req, res, next) => {
       if (hasOutOfStock) {
         status = "Out of Stock";
       } else {
-        status = "low stock";
+        status = "Low Stock";
       }
 
-      const affectedSizes = products.sizes.filter((size) => size.stock <= 5);
+      const affectedSizes = () => {
+        if (status === "Low Stock") {
+          return products.sizes.filter(
+            (size) => size.stock <= 5 && size.stock !== 0,
+          );
+        } else {
+          return products.sizes.filter((size) => size.stock === 0);
+        }
+      };
 
       return {
         ...products,
         status,
-        affectedSizes,
+        affectedSizes:affectedSizes()
       };
     });
 

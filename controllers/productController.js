@@ -198,7 +198,12 @@ export const listProduct = async (req, res, next) => {
 };
 
 export const adminListProduct = async (req, res, next) => {
+  let { page, pageSize } = req.query;
   try {
+    page = parseInt(page) || 1;
+    pageSize = parseInt(pageSize) || 5;
+    const skip = (page - 1) * pageSize;
+
     const {
       category,
       sub_category: subCategory,
@@ -228,11 +233,56 @@ export const adminListProduct = async (req, res, next) => {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filters.name = { $regex: escaped, $options: "i" };
     }
-    const productList = await Product.find(filters);
+
+    // aggregation framework for pagination the stage $match , $sort and $facet
+
+    const [result] = await Product.aggregate([
+      { $match: filters },
+      {
+        $facet: {
+          metadata: [{ $count: "totalCount" }],
+          data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+          inStockProduct: [
+            {
+              $match: {
+                sizes: { $not: { $elemMatch: { stock: { $lte: 5 } } } },
+              },
+            },
+            { $count: "totalInStock" },
+          ],
+        },
+      },
+    ]);
+    
+
+    const transformedProductData = result.data.map( (product) => {
+
+      const hasLowStock = product.sizes.some(
+        (size) => size.stock <= 5 && size.stock !== 0,
+      );
+      const hasOutStock = product.sizes.some((size) => size.stock === 0);
+      const hasInStock = product.sizes.every((size) => size.stock > 5);
+
+      return {
+        ...product,
+        status:hasOutStock 
+          ? "Out Stock"
+          : hasLowStock
+            ? "Low Stock"
+            : "In Stock",
+      };
+    });
+
 
     res.json({
-      data: "hey this is adminListProduct, long time how r u!!!",
-      product: productList,
+      message: "Product fetched successfully",
+      data: {
+        data : transformedProductData,
+        metadata: {
+          totalCount: result.metadata[0].totalCount,
+          totalInStockCount: result.inStockProduct[0].totalInStock,
+        },
+      },
     });
   } catch (err) {
     next(err);
