@@ -203,12 +203,12 @@ export const adminListProduct = async (req, res, next) => {
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 5;
     const skip = (page - 1) * pageSize;
-
+    
     const {
       category,
       sub_category: subCategory,
       stock_status: stockStatus,
-      search,
+      q: search,
     } = req.query;
 
     let filters = {};
@@ -222,7 +222,7 @@ export const adminListProduct = async (req, res, next) => {
     }
     if (stockStatus) {
       if (stockStatus === "low_stock") {
-        filters.sizes = { $elemMatch: { stock: { $lte: 5 } } };
+        filters.sizes = { $elemMatch: { stock: { $gt: 1, $lte: 5 } } };
       }
       if (stockStatus === "out_of_stock") {
         filters.sizes = { $elemMatch: { stock: { $eq: 0 } } };
@@ -233,8 +233,6 @@ export const adminListProduct = async (req, res, next) => {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       filters.name = { $regex: escaped, $options: "i" };
     }
-
-    // aggregation framework for pagination the stage $match , $sort and $facet
 
     const [result] = await Product.aggregate([
       { $match: filters },
@@ -253,10 +251,8 @@ export const adminListProduct = async (req, res, next) => {
         },
       },
     ]);
-    
 
-    const transformedProductData = result.data.map( (product) => {
-
+    const transformedProductData = result.data.map((product) => {
       const hasLowStock = product.sizes.some(
         (size) => size.stock <= 5 && size.stock !== 0,
       );
@@ -265,22 +261,21 @@ export const adminListProduct = async (req, res, next) => {
 
       return {
         ...product,
-        status:hasOutStock 
-          ? "Out Stock"
+        status: hasOutStock
+          ? "Out of Stock"
           : hasLowStock
             ? "Low Stock"
             : "In Stock",
       };
     });
 
-
     res.json({
       message: "Product fetched successfully",
       data: {
-        data : transformedProductData,
+        data: transformedProductData,
         metadata: {
-          totalCount: result.metadata[0].totalCount,
-          totalInStockCount: result.inStockProduct[0].totalInStock,
+          totalCount: result.metadata[0]?.totalCount ?? 0,
+          totalInStockCount: result.inStockProduct[0]?.totalInStock ?? 0,
         },
       },
     });

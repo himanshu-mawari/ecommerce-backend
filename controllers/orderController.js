@@ -74,7 +74,7 @@ export const createOrder = async (req, res, next) => {
       return next(createError(404, "Invalid or unauthorized address"));
     }
 
-    const orderId = Math.floor(10000 + Math.random() * 9000)
+    const orderId = Math.floor(10000 + Math.random() * 9000);
 
     const order = await Order.create({
       userId: loggedInUserId,
@@ -296,22 +296,83 @@ export const cancelOrder = async (req, res, next) => {
 
 export const allOrders = async (req, res, next) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, parseInt(req.query.limit) || 10);
-    const skip = (page - 1) * limit;
+    let { page, pageSize } = req.query;
+    const {
+      payment_status: paymentStatus,
+      order_status: orderStatus,
+      date,
+    } = req.query;
 
-    const [orders, total] = await Promise.all([
-      Order.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Order.countDocuments(),
+    page = parseInt(page) || 1;
+    pageSize = parseInt(pageSize) || 5;
+    const skip = (page - 1) * pageSize;
+
+    let filters = {};
+
+    if (paymentStatus) {
+      filters["paymentDetails.status"] = paymentStatus;
+    }
+
+    if (orderStatus) {
+      filters.status = orderStatus;
+    }
+
+    if (date) {
+      const DATE_RANGE_DAYS = {
+        today: 1,
+        last7days: 7,
+        last30days: 30,
+      };
+
+      const days = DATE_RANGE_DAYS[date];
+
+      if (days) {
+        const endingDate = new Date();
+        endingDate.setHours(0, 0, 0, 0);
+        endingDate.setDate(endingDate.getDate() + 1);
+
+        const startingDate = new Date(endingDate);
+        startingDate.setDate(startingDate.getDate() - days);
+
+        filters.createdAt = { $gte: startingDate, $lt: endingDate };
+      }
+    }
+
+    const [totalOrders , totalPendingOrdersCount,totalCancelledOrdersCount] =
+      await Promise.all([
+        Order.countDocuments({}),
+        Order.countDocuments({
+          status: "pending",
+        }),
+        Order.countDocuments({
+          status: "cancelled",
+        }),
+      ]);
+
+    const [result] = await Order.aggregate([
+      { $match: filters },
+      {
+        $facet: {
+          metadata: [{ $count: "totalCount" }],
+          data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+        },
+      },
     ]);
-
+    console.log(result);
     res.json({
       message: "Successfully send all orders",
-      page,
-      total,
-      limit,
-      totalPages: Math.ceil(total / limit),
-      data: orders,
+      data: {
+        metadata: {
+          page,
+          totalOrders,
+          pageSize,
+          totalPages: Math.ceil(totalOrders / pageSize),
+          totalPendingOrdersCount,
+          totalCancelledOrdersCount,
+        },
+        data:result?.data
+        
+      },
     });
   } catch (err) {
     next(err);

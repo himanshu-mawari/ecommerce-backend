@@ -16,7 +16,7 @@ import cors from "cors";
 const app = express();
 const ports = process.env.PORTS || 4000;
 
-app.use(
+app.use(  
   cors({
     origin: "http://localhost:5173",
     credentials: true,
