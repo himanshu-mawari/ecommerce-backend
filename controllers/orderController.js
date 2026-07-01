@@ -298,10 +298,13 @@ export const allOrders = async (req, res, next) => {
   try {
     let { page, pageSize } = req.query;
     const {
+      q: search,
       payment_status: paymentStatus,
       order_status: orderStatus,
       date,
     } = req.query;
+
+    console.log(req.query);
 
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 5;
@@ -315,6 +318,27 @@ export const allOrders = async (req, res, next) => {
 
     if (orderStatus) {
       filters.status = orderStatus;
+    }
+
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const orCondition = [
+        { "shippingAddress.name": { $regex: escaped, $options: "i" } },
+      ];
+
+      if (/^\d+$/.test(search)) {
+        orCondition.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: "$orderId" },
+              regex: escaped,
+              options: "i",
+            },
+          },
+        });
+      }
+
+      filters.$or = orCondition;
     }
 
     if (date) {
@@ -338,7 +362,7 @@ export const allOrders = async (req, res, next) => {
       }
     }
 
-    const [totalOrders , totalPendingOrdersCount,totalCancelledOrdersCount] =
+    const [totalOrders, totalPendingOrdersCount, totalCancelledOrdersCount] =
       await Promise.all([
         Order.countDocuments({}),
         Order.countDocuments({
@@ -358,7 +382,6 @@ export const allOrders = async (req, res, next) => {
         },
       },
     ]);
-    console.log(result);
     res.json({
       message: "Successfully send all orders",
       data: {
@@ -370,8 +393,7 @@ export const allOrders = async (req, res, next) => {
           totalPendingOrdersCount,
           totalCancelledOrdersCount,
         },
-        data:result?.data
-        
+        data: result?.data,
       },
     });
   } catch (err) {

@@ -29,7 +29,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/cart", cartRouter);
-app.use("/api/order", orderRouter);
+app.use("/api/orders", orderRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/admin", dashboardRouter);
 app.use(errorMiddleware);
