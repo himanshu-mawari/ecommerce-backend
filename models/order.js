@@ -162,6 +162,8 @@ const orderSchema = mongoose.Schema(
     cancelledAt: {
       type: Date,
     },
+    confirmedAt: { type: Date },
+    packedAt: { type: Date },
   },
   { timestamps: true },
 );
