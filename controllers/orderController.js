@@ -91,6 +91,8 @@ export const createOrder = async (req, res, next) => {
       shippedAt: null,
       deliveredAt: null,
       cancelledAt: null,
+      packedAt: null,
+      confirmed: null,
     });
 
     if (paymentMethod === "COD") {
@@ -236,13 +238,16 @@ export const updateOrderStatus = async (req, res, next) => {
     if (!allowedNext.includes(status)) {
       return next(createError(400, "Invalid status transition"));
     }
-
+    const STATUS_TIMESTAMP_FIELD = {
+      confirmed: "confirmedAt",
+      packed: "packedAt",
+      shipped: "shippedAt",
+      delivered: "deliveredAt",
+      cancelled: "cancelledAt",
+    };
     order.status = status;
-
-    if (status === "shipped") order.shippedAt = new Date();
-    if (status === "delivered") order.deliveredAt = new Date();
-    if (status === "cancelled") order.cancelledAt = new Date();
-
+    const field = STATUS_TIMESTAMP_FIELD[status];
+    if (field) order[field] = new Date();
     await order.save();
 
     res.json({
@@ -304,10 +309,8 @@ export const allOrders = async (req, res, next) => {
       date,
     } = req.query;
 
-    console.log(req.query);
-
     page = parseInt(page) || 1;
-    pageSize = parseInt(pageSize) || 5;
+    pageSize = parseInt(pageSize) || 10;
     const skip = (page - 1) * pageSize;
 
     let filters = {};
@@ -362,9 +365,8 @@ export const allOrders = async (req, res, next) => {
       }
     }
 
-    const [totalOrders, totalPendingOrdersCount, totalCancelledOrdersCount] =
+    const [totalPendingOrdersCount, totalCancelledOrdersCount] =
       await Promise.all([
-        Order.countDocuments({}),
         Order.countDocuments({
           status: "pending",
         }),
@@ -378,20 +380,21 @@ export const allOrders = async (req, res, next) => {
       {
         $facet: {
           metadata: [{ $count: "totalCount" }],
-          data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+          data: [{ $skip: skip }, { $limit: pageSize }],
         },
       },
     ]);
+    const totalOrdersCount = result?.metadata[0]?.totalCount;
     res.json({
       message: "Successfully send all orders",
       data: {
         metadata: {
           page,
-          totalOrders,
           pageSize,
-          totalPages: Math.ceil(totalOrders / pageSize),
+          totalPages: Math.ceil(totalOrdersCount / pageSize),
           totalPendingOrdersCount,
           totalCancelledOrdersCount,
+          totalOrdersCount,
         },
         data: result?.data,
       },
