@@ -167,6 +167,8 @@ export const singleOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
 
+    console.log(orderId)
+
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
     }
@@ -187,12 +189,34 @@ export const singleOrder = async (req, res, next) => {
     next(err);
   }
 };
+export const getOrderDetails = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    console.log(req.params)
+    console.log(orderId)
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return next(createError(400, "Invalid order ID"));
+    }
+
+    const order = await Order.findById(orderId)
+    if (!order) {
+      return next(createError(404, "Order not found"));
+    }
+
+    res.json({
+      message: "Order fetched Successfully",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
     }
