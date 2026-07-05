@@ -167,7 +167,7 @@ export const singleOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
 
-    console.log(orderId)
+    console.log(orderId);
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
@@ -192,14 +192,14 @@ export const singleOrder = async (req, res, next) => {
 export const getOrderDetails = async (req, res, next) => {
   try {
     const { orderId } = req.params;
-    console.log(req.params)
-    console.log(orderId)
+    console.log(req.params);
+    console.log(orderId);
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
     }
 
-    const order = await Order.findById(orderId)
+    const order = await Order.findById(orderId);
     if (!order) {
       return next(createError(404, "Order not found"));
     }
@@ -276,6 +276,38 @@ export const updateOrderStatus = async (req, res, next) => {
 
     res.json({
       message: "Order status updated successfully",
+      data: order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const adminCancelOrder = async (req, res, next) => {
+  try {
+    console.log("Hey im admin cancel order")
+    const { orderId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return next(createError(400, "Invalid order ID"));
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return next(createError(404, "Order not found"));
+    }
+
+    const blockedStatus = ["shipped", "delivered"];
+    if (blockedStatus.includes(order.status)) {
+      return next(createError(400, "Order cannot be cancelled at this stage"));
+    }
+
+    order.status = "cancelled";
+    await order.save();
+
+    res.json({
+      message: "Order cancelled successfully",
       data: order,
     });
   } catch (err) {
