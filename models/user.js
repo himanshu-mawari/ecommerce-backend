@@ -21,9 +21,9 @@ const userSchema = new mongoose.Schema({
 
   phone: {
     type: String,
-    unique: true
+    unique: true,
   },
-  
+
   password: {
     type: String,
     required: true,
@@ -46,6 +46,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+    },
+  ],
+
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
   ],
 
