@@ -3,6 +3,7 @@ import User from "../models/user.js";
 import Product from "../models/product.js";
 import { validateUpdatesData } from "../helpers/validate.js";
 import { mongoose } from "mongoose";
+const PRODUCT_NEEDED_DATA = "name images price"
 
 export const getUserData = (req, res, next) => {
   try {
@@ -73,6 +74,19 @@ export const addWishlistProduct = async (req, res, next) => {
 
     res.json({
       message: "Added product on wishlist successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getWishlistProduct = async (req, res, next) => {
+  try {
+    const loggedInUser = await req.user.populate("wishlist", PRODUCT_NEEDED_DATA);
+
+    res.json({
+      message: "Successfully reads wishlist products",
+      data: { wishlist: loggedInUser.wishlist },
     });
   } catch (err) {
     next(err);
