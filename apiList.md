@@ -14,12 +14,15 @@ This document lists all available API endpoints for the e-commerce backend.
 
 ---
 
-## 👤 Profile Routes
+## 👤 User Routes
 
-| Method | Endpoint                 | Description                   |
-| ------ | ------------------------ | ----------------------------- |
-| GET    | /api/user/profile        | Get logged-in user profile    |
-| PATCH  | /api/user/profile/update | Update user profile (partial) |
+| Method | Endpoint                            | Description                   |
+| ------ | ----------------------------------- | ----------------------------- |
+| GET    | /api/user/profile                   | Get logged-in user profile    |
+| PATCH  | /api/user/profile/update            | Update user profile (partial) |
+| GET    | /api/user/wishlist/items            | Get user wishlist             |
+| POST   | /api/user/wishlist/items            | Create user wishlist          |
+| DELETE | /api/user/wishlist/items/:productId | Remove user wishlist          |
 
 ---
 
@@ -42,6 +45,7 @@ This document lists all available API endpoints for the e-commerce backend.
 | POST   | /api/products/add                        | Add new product (Admin)  |
 | DELETE | /api/products/remove/:productId          | Delete a product (Admin) |
 | GET    | /api/products/:id                        | Get product by ID        |
+| PATCH  | /api/products/edit/:productId            | Update product by ID     |
 | GET    | /api/products/list                       | Get all products         |
 | GET    | /api/products/home                       | Get home page products   |
 | GET    | /api/products/related-product/:productId | Get related products     |
