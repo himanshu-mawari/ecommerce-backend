@@ -3,7 +3,7 @@ import User from "../models/user.js";
 import Product from "../models/product.js";
 import { validateUpdatesData } from "../helpers/validate.js";
 import { mongoose } from "mongoose";
-const PRODUCT_NEEDED_DATA = "name images price"
+const PRODUCT_NEEDED_DATA = "name images price";
 
 export const getUserData = (req, res, next) => {
   try {
@@ -82,11 +82,48 @@ export const addWishlistProduct = async (req, res, next) => {
 
 export const getWishlistProduct = async (req, res, next) => {
   try {
-    const loggedInUser = await req.user.populate("wishlist", PRODUCT_NEEDED_DATA);
+    const loggedInUser = await req.user.populate(
+      "wishlist",
+      PRODUCT_NEEDED_DATA,
+    );
 
     res.json({
       message: "Successfully reads wishlist products",
       data: { wishlist: loggedInUser.wishlist },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeWishlistProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const loggedInUser = req.user;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return next(createError(400, "Invalid product id"));
+    }
+
+    const isProductExist = loggedInUser.wishlist.some(
+      (id) => id.toString() === productId,
+    );
+
+    if (!isProductExist) {
+      return next(createError(404, "Product not found"));
+    }
+
+    // remove specific product from user wishlist .......
+
+    const newWishlist = loggedInUser.wishlist.filter(
+      (p) => p.toString() !== productId.toString(),
+    );
+
+    loggedInUser.wishlist = newWishlist;
+    loggedInUser.save();
+
+    return res.json({
+      message: "Successfully removed wishlist product",
     });
   } catch (err) {
     next(err);
