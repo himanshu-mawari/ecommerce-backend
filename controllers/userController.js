@@ -1,6 +1,8 @@
 import createError from "../helpers/createError.js";
 import User from "../models/user.js";
+import Product from "../models/product.js";
 import { validateUpdatesData } from "../helpers/validate.js";
+import { mongoose } from "mongoose";
 
 export const getUserData = (req, res, next) => {
   try {
@@ -24,13 +26,12 @@ export const updateUserData = async (req, res, next) => {
     const loggedInUser = req.user;
     const updatesData = req.body;
     const allowedFields = ["name", "email", "phone"];
- 
+
     const updates = {};
-    
 
     for (let key of allowedFields) {
       if (req.body[key] !== undefined) {
-        updates[key] = req.body[key]; 
+        updates[key] = req.body[key];
       }
     }
 
@@ -42,6 +43,36 @@ export const updateUserData = async (req, res, next) => {
     res.json({
       message: "getUserData call listen successfully",
       user: loggedInUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const addWishlistProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.body;
+    const loggedInUser = req.user;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return next(createError(400, "Invalid product id"));
+    }
+
+    if (loggedInUser.wishlist.includes(product_id)) {
+      return next(createError(400, "Product already exists in wishlist"));
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return next(createError(404, "Product not found"));
+    }
+
+    loggedInUser.wishlist.push(product._id);
+
+    await loggedInUser.save();
+
+    res.json({
+      message: "Added product on wishlist successfully",
     });
   } catch (err) {
     next(err);
