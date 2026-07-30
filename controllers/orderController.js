@@ -167,7 +167,6 @@ export const singleOrder = async (req, res, next) => {
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
 
-    console.log(orderId);
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
@@ -192,8 +191,6 @@ export const singleOrder = async (req, res, next) => {
 export const getOrderDetails = async (req, res, next) => {
   try {
     const { orderId } = req.params;
-    console.log(req.params);
-    console.log(orderId);
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
@@ -285,7 +282,6 @@ export const updateOrderStatus = async (req, res, next) => {
 
 export const adminCancelOrder = async (req, res, next) => {
   try {
-    console.log("Hey im admin cancel order")
     const { orderId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {

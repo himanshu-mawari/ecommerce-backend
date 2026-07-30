@@ -58,18 +58,19 @@ export const getCart = async (req, res, next) => {
     res.json({
       message: "User cart",
       data: {
-        items:cartItems,
+        items: cartItems,
         summary: {
           subTotal,
           shippingFee,
           total,
         },
       },
-    }); 
+    });
   } catch (err) {
-    next(err); 
+    next(err);
   }
 };
+
 export const updateCart = async (req, res, next) => {
   try {
     const user = req.user;

@@ -59,7 +59,7 @@ export const addWishlistProduct = async (req, res, next) => {
       return next(createError(400, "Invalid product id"));
     }
 
-    if (loggedInUser.wishlist.includes(product_id)) {
+    if (loggedInUser.wishlist.includes(productId)) {
       return next(createError(400, "Product already exists in wishlist"));
     }
 
@@ -87,9 +87,14 @@ export const getWishlistProduct = async (req, res, next) => {
       PRODUCT_NEEDED_DATA,
     );
 
+    const wishlist = loggedInUser.wishlist ;
+
+
+
+
     res.json({
       message: "Successfully reads wishlist products",
-      data: { wishlist: loggedInUser.wishlist },
+      data: { wishlist },
     });
   } catch (err) {
     next(err);

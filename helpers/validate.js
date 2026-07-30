@@ -48,8 +48,10 @@ export const validateProductDetails = (
   if (!sizes) {
     throw createError(400, "Product sizes are required");
   }
+
   let parsedSizes;
   try {
+    
     parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
   } catch {
     throw createError(400, "Invalid sizes format");

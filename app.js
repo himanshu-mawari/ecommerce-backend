@@ -8,7 +8,7 @@ import productRouter from "./routes/productRoute.js";
 import cookieParser from "cookie-parser";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
-import userRouter from "./routes/user.js";
+import userRouter from "./routes/userRoute.js";
 import addressRouter from "./routes/addressRoute.js";
 import dashboardRouter from "./routes/dashboard.js";
 import cors from "cors";

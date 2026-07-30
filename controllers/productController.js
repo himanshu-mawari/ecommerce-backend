@@ -94,12 +94,17 @@ export const updateProduct = async (req, res, next) => {
       productExist.images = updatedImage;
     }
 
-    Object.keys(req.body).forEach((key) => (productExist[key] = req.body[key]));
+    const { sizes, ...rest } = req.body;
+
+    Object.keys(rest).forEach((key) => (productExist[key] = req.body[key]));
+    
+    if (sizes) {
+      productExist.sizes = JSON.parse(sizes);
+    }
     await productExist.save();
 
     res.json({
       message: "Successfully update the product",
-      product: { fileData: req.files, bodyData: req.body },
     });
   } catch (err) {
     next(err);
@@ -138,13 +143,14 @@ export const listProduct = async (req, res, next) => {
     const {
       category,
       bestSeller,
-      search,
+      debounceSearch:search,
       sort,
       minPrice,
       maxPrice,
       collectionType,
       gender,
     } = req.query;
+
 
     const skip = (page - 1) * limit;
 
@@ -201,9 +207,9 @@ export const adminListProduct = async (req, res, next) => {
   let { page, pageSize } = req.query;
   try {
     page = parseInt(page) || 1;
-    pageSize = parseInt(pageSize) || 5;
+    pageSize = parseInt(pageSize) || 10;
     const skip = (page - 1) * pageSize;
-    
+
     const {
       category,
       sub_category: subCategory,
@@ -240,16 +246,15 @@ export const adminListProduct = async (req, res, next) => {
         $facet: {
           metadata: [{ $count: "totalCount" }],
           data: [{ $skip: (page - 1) * pageSize }, { $limit: pageSize }],
-          inStockProduct: [
-            {
-              $match: {
-                sizes: { $not: { $elemMatch: { stock: { $lte: 5 } } } },
-              },
-            },
-            { $count: "totalInStock" },
-          ],
         },
       },
+    ]);
+
+    const [totalProducts, totalInStockProducts] = await Promise.all([
+      Product.countDocuments(),
+      Product.find({
+        sizes: { $not: { $elemMatch: { stock: { $lte: 5 } } } },
+      }).countDocuments(),
     ]);
 
     const transformedProductData = result.data.map((product) => {
@@ -273,9 +278,13 @@ export const adminListProduct = async (req, res, next) => {
       message: "Product fetched successfully",
       data: {
         data: transformedProductData,
+        totalProducts,
+        totalInStockProducts,
         metadata: {
-          totalCount: result.metadata[0]?.totalCount ?? 0,
-          totalInStockCount: result.inStockProduct[0]?.totalInStock ?? 0,
+          totalProductCount: result.metadata[0]?.totalCount ?? 0,
+          page,
+          totalPages: Math.ceil(result.metadata[0]?.totalCount / pageSize),
+          pageSize,
         },
       },
     });
@@ -310,9 +319,9 @@ export const homeProduct = async (req, res, next) => {
   try {
     const latestProduct = await Product.find({})
       .sort({ createdAt: -1 })
-      .limit(8);
+      .limit(6);
 
-    const bestSeller = await Product.find({ bestSeller: true }).limit(8);
+    const bestSeller = await Product.find({ bestSeller: true }).limit(6);
 
     res.json({
       message: "Successfully fetched home products",
