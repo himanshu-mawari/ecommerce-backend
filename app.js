@@ -14,7 +14,7 @@ import dashboardRouter from "./routes/dashboard.js";
 import cors from "cors";
 
 const app = express();
-const ports = process.env.PORTS || 4000;
+const ports = process.env.PORT || 4000;
 
 app.use(  
   cors({

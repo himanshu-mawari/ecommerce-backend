@@ -73,7 +73,7 @@ userSchema.methods.verifyPassword = async function (password) {
 
 userSchema.methods.getJwt = function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
   return token;
