@@ -51,7 +51,6 @@ export const validateProductDetails = (
 
   let parsedSizes;
   try {
-    
     parsedSizes = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
   } catch {
     throw createError(400, "Invalid sizes format");
@@ -66,7 +65,8 @@ export const validateProductDetails = (
     if (!validSizes.includes(item.size)) {
       throw createError(400, `Invalid size: ${item.size}`);
     }
-    if (typeof item.stock !== "number" || item.stock < 0) {
+
+    if (typeof item.stock !== "number" || isNaN(item.stock) || item.stock < 0) {
       throw createError(400, "Invalid stock quantity");
     }
     if (seen.has(item.size)) {
