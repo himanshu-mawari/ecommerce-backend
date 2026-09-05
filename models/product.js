@@ -23,6 +23,10 @@ const productSchema = mongoose.Schema(
     subCategory: {
       type: String,
       required: true,
+      enum: {
+        values: ["topwear" , "bottomwear" , "winterwear" , "dresses"],
+        message: `{VALUE} is not a valid sub category`
+      }
     },
     price: {
       type: Number,
