@@ -1,28 +1,23 @@
 import { validateProductDetails } from "../helpers/validate.js";
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
 import Product from "../models/product.js";
 import createError from "../helpers/createError.js";
 import mongoose from "mongoose";
+import uploadToCloudinary from "../helpers/uploadToCloudinary.js";
 
 export const addProduct = async (req, res, next) => {
-  const uploadedImages = [];
-
   try {
-    validateProductDetails(req.body, req.files);
+    const sizes = JSON.parse(req.body.sizes).map((item) => ({
+      ...item,
+      stock: Number(item.stock),
+    }));
+    validateProductDetails({ ...req.body, sizes }, req.files);
 
     const { name, description, category, subCategory, price, collectionType } =
       req.body;
-    const sizes = JSON.parse(req.body.sizes);
-
     const uploadPromises = Object.values(req.files).map(async (fileArr) => {
       const file = fileArr[0];
-
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: "products",
-      });
-
-      fs.unlinkSync(file.path);
+      const result = await uploadToCloudinary(file.buffer, "products");
 
       return {
         url: result.secure_url,
@@ -32,8 +27,6 @@ export const addProduct = async (req, res, next) => {
 
     const results = await Promise.all(uploadPromises);
 
-    uploadedImages.push(...results);
-
     const newProduct = await Product.create({
       name,
       description,
@@ -42,7 +35,7 @@ export const addProduct = async (req, res, next) => {
       collectionType,
       price,
       sizes,
-      images: uploadedImages,
+      images: results,
     });
 
     res.status(201).json({
@@ -50,16 +43,11 @@ export const addProduct = async (req, res, next) => {
       product: newProduct,
     });
   } catch (err) {
-    await Promise.all(
-      uploadedImages.map((img) => cloudinary.uploader.destroy(img.public_id)),
-    );
-
     next(err);
   }
 };
 
 export const updateProduct = async (req, res, next) => {
-  let updatedImage = [];
   try {
     const { productId } = req.params;
 
@@ -77,12 +65,7 @@ export const updateProduct = async (req, res, next) => {
 
       const uploadPromises = Object.values(req.files).map(async (fileArr) => {
         const file = fileArr[0];
-
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: "products",
-        });
-
-        fs.unlinkSync(file.path);
+        const result = await uploadToCloudinary(file.buffer, "products");
 
         return {
           url: result.secure_url,
@@ -97,7 +80,7 @@ export const updateProduct = async (req, res, next) => {
     const { sizes, ...rest } = req.body;
 
     Object.keys(rest).forEach((key) => (productExist[key] = req.body[key]));
-    
+
     if (sizes) {
       productExist.sizes = JSON.parse(sizes);
     }
@@ -143,14 +126,13 @@ export const listProduct = async (req, res, next) => {
     const {
       category,
       bestSeller,
-      debounceSearch:search,
+      debounceSearch: search,
       sort,
       minPrice,
       maxPrice,
       collectionType,
       gender,
     } = req.query;
-
 
     const skip = (page - 1) * limit;
 
