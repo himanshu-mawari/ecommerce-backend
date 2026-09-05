@@ -140,7 +140,7 @@ export const userOrders = async (req, res, next) => {
     const loggedInUserId = req.user._id;
 
     const getUserOrders = await Order.find({ userId: loggedInUserId })
-      .select("items status createdAt paymentDetails totalAmount")
+      .select("items status createdAt paymentDetails totalAmount orderId")
       .sort({ createdAt: -1 });
 
     if (getUserOrders.length === 0) {
