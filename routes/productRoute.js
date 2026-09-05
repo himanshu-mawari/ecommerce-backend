@@ -28,7 +28,7 @@ productRouter.patch("/edit/:productId" , verifyAuth , verifyAdmin ,upload.fields
   {name:"image4" , maxCount: 1}
 ]) ,updateProduct)
 productRouter.get("/admin/list",verifyAuth, adminListProduct);
-productRouter.get("/list",verifyAuth, listProduct);
+productRouter.get("/list", listProduct);
 
 productRouter.delete("/remove/:productId" , verifyAuth , verifyAdmin, removeProduct);
 productRouter.get("/:productId", singleProduct);
