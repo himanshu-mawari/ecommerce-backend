@@ -87,10 +87,7 @@ export const getWishlistProduct = async (req, res, next) => {
       PRODUCT_NEEDED_DATA,
     );
 
-    const wishlist = loggedInUser.wishlist ;
-
-
-
+    const wishlist = loggedInUser.wishlist;
 
     res.json({
       message: "Successfully reads wishlist products",
