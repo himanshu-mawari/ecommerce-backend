@@ -122,6 +122,7 @@ export const createOrder = async (req, res, next) => {
     }
 
     if (paymentMethod === "ONLINE") {
+      return next(createError(400, "Online payment method not supported"));
     }
 
     await loggedInUser.save();
@@ -166,7 +167,6 @@ export const singleOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
     const loggedInUserId = req.user._id;
-
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       return next(createError(400, "Invalid order ID"));
