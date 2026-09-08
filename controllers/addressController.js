@@ -65,7 +65,7 @@ export const getAllAddresses = async (req, res, next) => {
 
     const loggedInUserAddresses = await Address.find({
       userId: loggedInUserId,
-    });
+    }).sort({createdAt: -1});
 
     if (!loggedInUserAddresses) {
       return next(createError(404, "Address not found"));
