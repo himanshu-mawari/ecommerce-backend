@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     unique: true,
+    sparse: true,
+    maxLength: [10, "Invalid phone number"],
   },
 
   password: {
