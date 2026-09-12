@@ -18,7 +18,12 @@ export const loginUser = async (req, res, next) => {
     }
 
     const token = await user.getJwt();
-    res.cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     const { password: _, ...safeUserDetails } = user.toObject();
 
@@ -28,7 +33,7 @@ export const loginUser = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
-  } 
+  }
 };
 
 export const signupUser = async (req, res, next) => {
@@ -51,7 +56,12 @@ export const signupUser = async (req, res, next) => {
 
     const savedUser = await user.save();
     const token = savedUser.getJwt();
-    res.cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     const { password: _, ...safeUserDetails } = savedUser.toObject();
 
@@ -66,7 +76,11 @@ export const signupUser = async (req, res, next) => {
 
 export const logout = (req, res, next) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
 
     res.json({
       message: "Logged out successfully",
