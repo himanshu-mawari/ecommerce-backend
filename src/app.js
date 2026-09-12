@@ -16,12 +16,12 @@ import cors from "cors";
 const app = express();
 const ports = process.env.PORT || 4000;
 
-app.use(  
+app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
-  }),  
-); 
+  }),
+);
 
 app.use(express.json());
 app.use(cookieParser());
