@@ -115,7 +115,6 @@ export const removeWishlistProduct = async (req, res, next) => {
       return next(createError(404, "Product not found"));
     }
 
-    // remove specific product from user wishlist .......
 
     const newWishlist = loggedInUser.wishlist.filter(
       (p) => p.toString() !== productId.toString(),
